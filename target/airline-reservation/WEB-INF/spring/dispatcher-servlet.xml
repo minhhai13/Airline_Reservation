@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <mvc:annotation-driven>
+        </mvc:annotation-driven>
+
+    <context:component-scan base-package="com.airline.controller" 
+                            use-default-filters="false">
+        <context:include-filter type="annotation" 
+                                expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" 
+                                expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+    <mvc:resources mapping="/assets/**" location="/assets/" />
+    <mvc:resources mapping="/cdn-cgi/**" location="/cdn-cgi/" />
+
+    <bean id="templateResolver" 
+          class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
+        <property name="prefix" value="/WEB-INF/views/" />
+        <property name="suffix" value=".html" />
+        <property name="templateMode" value="HTML" />
+        <property name="characterEncoding" value="UTF-8" />
+        <property name="cacheable" value="false" />
+    </bean>
+
+    <bean id="templateEngine" 
+          class="org.thymeleaf.spring6.SpringTemplateEngine">
+        <property name="templateResolver" ref="templateResolver" />
+        <property name="enableSpringELCompiler" value="true" />
+    </bean>
+
+    <bean class="org.thymeleaf.spring6.view.ThymeleafViewResolver">
+        <property name="templateEngine" ref="templateEngine" />
+        <property name="characterEncoding" value="UTF-8" />
+        <property name="order" value="1" />
+    </bean>
+
+    <bean id="multipartResolver" 
+          class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
+</beans>
