@@ -1,0 +1,63 @@
+<!-- ============================================================================ -->
+<!-- user/recommendations.html - AI Flight Recommendations -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Recommendations - SkyReserve')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-star-fill text-warning"></i> Recommended Flights for You
+    </h2>
+
+    <div class="alert alert-info">
+        <i class="bi bi-lightbulb"></i>
+        <strong>AI-Powered Recommendations</strong><br>
+        Based on your booking history, we've found these flights that might interest you.
+    </div>
+
+    <div id="recommendationsContent">
+        <div th:if="${#lists.isEmpty(flights)}" class="text-center py-5">
+            <i class="bi bi-robot display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">No recommendations yet</h4>
+            <p>Book more flights to get personalized recommendations!</p>
+            <a href="/flights/search" class="btn btn-primary mt-3">
+                <i class="bi bi-search"></i> Search Flights
+            </a>
+        </div>
+
+        <div th:each="flight : ${flights}">
+            <div th:replace="~{fragments/layout :: flight-card(${flight})}"></div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+    // Load recommendations dynamically (optional)
+    async function loadRecommendations() {
+        try {
+            const response = await fetch('/api/recommendations?limit=5');
+            const result = await response.json();
+
+            if (result.success && result.data.length > 0) {
+                displayRecommendations(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading recommendations:', error);
+        }
+    }
+
+    function displayRecommendations(flights) {
+        // Update DOM with flight recommendations
+        console.log('Recommendations:', flights);
+    }
+</script>
+
+</body>
+</html>

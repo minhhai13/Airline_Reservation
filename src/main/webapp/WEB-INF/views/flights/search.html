@@ -1,0 +1,108 @@
+<!-- ============================================================================ -->
+<!-- flights/search.html - Flight Search Results -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Search Flights - SkyReserve')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container mt-4">
+    <h2 class="mb-4">
+        <i class="bi bi-search"></i> Search Results
+        <span class="badge bg-primary" th:text="${#lists.size(flights)} + ' flights found'">
+            0 flights found
+        </span>
+    </h2>
+
+    <!-- Search Form -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/flights/search}" method="get" id="searchForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">From</label>
+                        <select class="form-select" name="origin" th:value="${origin}">
+                            <option value="">Select Origin</option>
+                            <option th:each="city : ${origins}" 
+                                    th:value="${city}" 
+                                    th:text="${city}"
+                                    th:selected="${city == origin}">Hanoi</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">To</label>
+                        <select class="form-select" name="destination" th:value="${destination}">
+                            <option value="">Select Destination</option>
+                            <option th:each="city : ${destinations}" 
+                                    th:value="${city}" 
+                                    th:text="${city}"
+                                    th:selected="${city == destination}">Ho Chi Minh City</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" name="date" 
+                               th:value="${date}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Passengers</label>
+                        <input type="number" class="form-control" name="passengers" 
+                               th:value="${passengers}" min="1" max="9">
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Flight Results -->
+    <div id="flightResults">
+        <div th:if="${#lists.isEmpty(flights)}" class="text-center py-5">
+            <i class="bi bi-airplane display-1 text-muted"></i>
+            <h4 class="mt-3 text-muted">No flights found</h4>
+            <p>Try adjusting your search criteria</p>
+        </div>
+
+        <div th:each="flight : ${flights}">
+            <div th:replace="~{fragments/layout :: flight-card(${flight})}"></div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+    // AJAX pagination (optional enhancement)
+    async function loadFlights(page) {
+        const form = document.getElementById('searchForm');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        params.append('page', page);
+        
+        try {
+            const response = await fetch('/api/flights?' + params.toString());
+            const result = await response.json();
+            
+            if (result.success) {
+                updateFlightList(result.data);
+            }
+        } catch (error) {
+            console.error('Error loading flights:', error);
+        }
+    }
+    
+    function updateFlightList(flights) {
+        // Update DOM with flight data
+        // Implementation depends on API structure
+    }
+</script>
+
+</body>
+</html>

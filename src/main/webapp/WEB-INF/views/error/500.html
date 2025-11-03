@@ -1,0 +1,40 @@
+<!-- ============================================================================ -->
+<!-- error/500.html - Internal Server Error -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('500 - Server Error')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+        <div class="col-md-6 text-center">
+            <i class="bi bi-x-octagon display-1 text-danger"></i>
+            <h1 class="display-1 fw-bold text-danger">500</h1>
+            <h2 class="mb-4">Internal Server Error</h2>
+            <p class="lead mb-4">
+                Something went wrong on our end. We're working to fix it!
+            </p>
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                Please try again later or contact support if the problem persists.
+            </div>
+            <div class="d-grid gap-2 d-sm-block">
+                <a href="/" class="btn btn-primary btn-lg">
+                    <i class="bi bi-house"></i> Go Home
+                </a>
+                <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-arrow-left"></i> Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+</body>
+</html>

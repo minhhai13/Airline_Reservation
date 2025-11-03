@@ -1,24 +1,16 @@
 package com.airline.service;
 
-import com.airline.dto.PaymentRequestDTO;
 import com.airline.entity.Payment;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * PaymentService Interface
- */
 public interface PaymentService {
-
-    Payment processPayment(PaymentRequestDTO requestDTO);
-
-    Payment markPaymentSuccess(Long paymentId, String transactionId);
-
-    Payment markPaymentFailed(Long paymentId, String reason);
-
+    Payment createPayment(Long bookingId, BigDecimal amount, String paymentMethod);
     Optional<Payment> findById(Long id);
-
     Optional<Payment> findByTransactionId(String transactionId);
-
     List<Payment> findByBookingId(Long bookingId);
+    Payment processPayment(Long paymentId, String transactionId);
+    Payment failPayment(Long paymentId, String reason);
 }
+

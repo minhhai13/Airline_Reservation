@@ -1,0 +1,130 @@
+<!-- ============================================================================ -->
+<!-- admin/bookings.html - Admin Booking Management -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage Bookings - Admin')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="list-group">
+                <a href="/admin/dashboard" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/admin/flights" class="list-group-item list-group-item-action">
+                    <i class="bi bi-airplane"></i> Flights
+                </a>
+                <a href="/admin/users" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people"></i> Users
+                </a>
+                <a href="/admin/bookings" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-ticket"></i> Bookings
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <h2 class="mb-4"><i class="bi bi-ticket"></i> Manage Bookings</h2>
+
+            <!-- Bookings Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Flight</th>
+                                    <th>Route</th>
+                                    <th>Date</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="booking : ${bookings}">
+                                    <td th:text="${booking.id}">1</td>
+                                    <td th:text="${booking.user.username}">john_doe</td>
+                                    <td>
+                                        <strong th:text="${booking.flight.flightNumber}">VN101</strong>
+                                        <br>
+                                        <small class="text-muted" 
+                                               th:text="${#temporals.format(booking.flight.departureTime, 'HH:mm dd/MM/yyyy')}">
+                                            06:00 05/11/2025
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span th:text="${booking.flight.route.origin}">Hanoi</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                        <span th:text="${booking.flight.route.destination}">Ho Chi Minh City</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(booking.bookingDate, 'dd/MM/yyyy')}">
+                                        01/11/2025
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT')}">
+                                        1,500,000
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${booking.status.toString() == 'CONFIRMED' ? 'badge-status-confirmed' : 
+                                                              (booking.status.toString() == 'PENDING' ? 'badge-status-pending' : 'badge-status-cancelled')}"
+                                              th:text="${booking.status}">
+                                            CONFIRMED
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                th:if="${booking.status.toString() != 'CANCELLED'}"
+                                                th:onclick="'cancelBookingAdmin(' + ${booking.id} + ')'">
+                                            <i class="bi bi-x-circle"></i> Cancel
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+    async function cancelBookingAdmin(bookingId) {
+        if (!confirm('Are you sure you want to cancel this booking?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/bookings/${bookingId}/cancel`, {
+                method: 'POST'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Booking cancelled successfully!');
+                location.reload();
+            } else {
+                alert('Failed to cancel booking: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+</script>
+
+</body>
+</html>

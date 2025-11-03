@@ -1,75 +1,56 @@
-// ========================================
-// IMPLEMENTATION
-// ========================================
 package com.airline.service.impl;
 
 import com.airline.dao.UserDAO;
-import com.airline.dto.UserRegistrationDTO;
 import com.airline.entity.User;
 import com.airline.service.UserService;
-import com.airline.exception.ResourceNotFoundException;
-import com.airline.exception.InvalidCredentialsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
-
 import java.util.Optional;
 
-/**
- * UserServiceImpl Implementation with @Transactional for atomic operations
- */
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserDAO userDAO;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserDAO userDAO;
 
     @Autowired
-    public UserServiceImpl(UserDAO userDAO, PasswordEncoder passwordEncoder) {
-        this.userDAO = userDAO;
-        this.passwordEncoder = passwordEncoder;
-    }
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    public User registerUser(UserRegistrationDTO dto) {
-        // Validate username uniqueness
-        if (userDAO.existsByUsername(dto.getUsername())) {
+    public User register(User user) {
+        if (existsByUsername(user.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
-
-        // Validate email uniqueness
-        if (userDAO.existsByEmail(dto.getEmail())) {
+        if (existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-
-        // Create new user
-        User user = User.builder()
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .email(dto.getEmail())
-                .fullName(dto.getFullName())
-                .role(User.UserRole.USER)
-                .build();
-
+        
+        // Hash password
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        
+        // Set default role if not set
+        if (user.getRole() == null) {
+            user.setRole(User.UserRole.USER);
+        }
+        
         return userDAO.save(user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<User> authenticateUser(String username, String password) {
+    public Optional<User> login(String username, String password) {
         Optional<User> userOpt = userDAO.findByUsername(username);
-
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             if (passwordEncoder.matches(password, user.getPassword())) {
                 return Optional.of(user);
             }
         }
-        throw new InvalidCredentialsException("Invalid username or password");
+        return Optional.empty();
     }
 
     @Override
@@ -109,9 +90,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        User user = userDAO.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        userDAO.delete(user);
+        userDAO.findById(id).ifPresent(userDAO::delete);
     }
 
     @Override
@@ -126,3 +105,4 @@ public class UserServiceImpl implements UserService {
         return userDAO.existsByEmail(email);
     }
 }
+

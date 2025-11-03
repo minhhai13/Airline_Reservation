@@ -1,34 +1,33 @@
 package com.airline.controller;
 
+import com.airline.service.RouteService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-/**
- * Home Controller Handles requests for the home page
- */
 @Controller
 public class HomeController {
 
-    /**
-     * Home page - Display index
-     */
+    @Autowired
+    private RouteService routeService;
+
     @GetMapping("/")
     public String home(Model model) {
-        return "user/landing";
+        try {
+            List<String> origins = routeService.getAllOrigins();
+            List<String> destinations = routeService.getAllDestinations();
+            model.addAttribute("origins", origins != null ? origins : new ArrayList<>());
+            model.addAttribute("destinations", destinations != null ? destinations : new ArrayList<>());
+        } catch (Exception e) {
+            // If database not connected, use empty lists
+            System.out.println("Warning: Could not load routes: " + e.getMessage());
+            model.addAttribute("origins", new ArrayList<>());
+            model.addAttribute("destinations", new ArrayList<>());
+        }
+        return "index";
     }
-
-    /**
-     * Test page
-     */
-    @GetMapping("/test")
-    public String test(Model model) {
-        model.addAttribute("title", "Test Page");
-        model.addAttribute("content", "Configuration is successful!");
-        return "test";
-    }
-
 }
+

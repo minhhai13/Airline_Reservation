@@ -1,0 +1,146 @@
+<!-- ============================================================================ -->
+<!-- admin/flights.html - Admin Flight Management -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Manage Flights - Admin')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2">
+            <div class="list-group">
+                <a href="/admin/dashboard" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a href="/admin/flights" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-airplane"></i> Flights
+                </a>
+                <a href="/admin/users" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people"></i> Users
+                </a>
+                <a href="/admin/bookings" class="list-group-item list-group-item-action">
+                    <i class="bi bi-ticket"></i> Bookings
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-airplane"></i> Manage Flights</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFlightModal">
+                    <i class="bi bi-plus-circle"></i> Add Flight
+                </button>
+            </div>
+
+            <!-- Flights Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Flight Number</th>
+                                    <th>Route</th>
+                                    <th>Departure</th>
+                                    <th>Arrival</th>
+                                    <th>Price</th>
+                                    <th>Available Seats</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="flight : ${flights}">
+                                    <td th:text="${flight.id}">1</td>
+                                    <td>
+                                        <strong th:text="${flight.flightNumber}">VN101</strong>
+                                        <br>
+                                        <small class="text-muted" th:text="${flight.aircraft.modelName}">
+                                            Boeing 737
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span th:text="${flight.route.origin}">Hanoi</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                        <span th:text="${flight.route.destination}">Ho Chi Minh City</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(flight.departureTime, 'HH:mm dd/MM/yyyy')}">
+                                        06:00 05/11/2025
+                                    </td>
+                                    <td th:text="${#temporals.format(flight.arrivalTime, 'HH:mm dd/MM/yyyy')}">
+                                        08:15 05/11/2025
+                                    </td>
+                                    <td th:text="${#numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')}">
+                                        1,500,000
+                                    </td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${flight.availableSeats > 50 ? 'bg-success' : 
+                                                              (flight.availableSeats > 20 ? 'bg-warning' : 'bg-danger')}"
+                                              th:text="${flight.availableSeats}">
+                                            150
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" 
+                                                    th:onclick="'editFlight(' + ${flight.id} + ')'">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" 
+                                                    th:onclick="'deleteFlight(' + ${flight.id} + ')'">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+<script>
+    async function deleteFlight(flightId) {
+        if (!confirm('Are you sure you want to delete this flight?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/admin/flights/${flightId}`, {
+                method: 'DELETE'
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert('Flight deleted successfully!');
+                location.reload();
+            } else {
+                alert('Failed to delete flight: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        }
+    }
+
+    function editFlight(flightId) {
+        // Implementation for editing flight
+        alert('Edit flight feature coming soon!');
+    }
+</script>
+
+</body>
+</html>

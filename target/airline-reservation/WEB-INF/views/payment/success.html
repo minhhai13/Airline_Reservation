@@ -1,0 +1,77 @@
+<!-- ============================================================================ -->
+<!-- payment/success.html - Payment Success Page -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Payment Success - SkyReserve')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card text-center shadow">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill display-1 text-success"></i>
+                    </div>
+                    
+                    <h2 class="text-success mb-3">Payment Successful!</h2>
+                    
+                    <p class="lead" th:text="${message}">
+                        Your booking has been confirmed.
+                    </p>
+
+                    <hr class="my-4">
+
+                    <div class="text-start" th:if="${booking != null}">
+                        <h5 class="mb-3">Booking Details</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Booking ID:</strong> <span th:text="${booking.id}">123</span></p>
+                                <p><strong>Flight:</strong> <span th:text="${booking.flight.flightNumber}">VN101</span></p>
+                                <p><strong>Route:</strong> 
+                                    <span th:text="${booking.flight.route.origin}">Hanoi</span> → 
+                                    <span th:text="${booking.flight.route.destination}">Ho Chi Minh City</span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Departure:</strong><br>
+                                    <span th:text="${#temporals.format(booking.flight.departureTime, 'HH:mm, dd/MM/yyyy')}">
+                                        06:00, 05/11/2025
+                                    </span>
+                                </p>
+                                <p><strong>Total Paid:</strong><br>
+                                    <span class="h5 text-success" 
+                                          th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                        1,500,000 VND
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-grid gap-2">
+                        <a href="/user/my-flights" class="btn btn-primary btn-lg">
+                            <i class="bi bi-ticket"></i> View My Flights
+                        </a>
+                        <a href="/" class="btn btn-outline-secondary">
+                            <i class="bi bi-house"></i> Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+</body>
+</html>
+

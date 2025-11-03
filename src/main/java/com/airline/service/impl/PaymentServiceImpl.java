@@ -1,91 +1,39 @@
-// ========================================
-// IMPLEMENTATION
-// ========================================
 package com.airline.service.impl;
 
 import com.airline.dao.BookingDAO;
 import com.airline.dao.PaymentDAO;
-import com.airline.dto.PaymentRequestDTO;
 import com.airline.entity.Booking;
 import com.airline.entity.Payment;
 import com.airline.service.PaymentService;
-import com.airline.exception.PaymentException;
-import com.airline.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * PaymentServiceImpl Handles payment processing with transaction management
- */
 @Service
 @Transactional
 public class PaymentServiceImpl implements PaymentService {
 
-    private final PaymentDAO paymentDAO;
-    private final BookingDAO bookingDAO;
+    @Autowired
+    private PaymentDAO paymentDAO;
 
     @Autowired
-    public PaymentServiceImpl(PaymentDAO paymentDAO, BookingDAO bookingDAO) {
-        this.paymentDAO = paymentDAO;
-        this.bookingDAO = bookingDAO;
-    }
+    private BookingDAO bookingDAO;
 
     @Override
-    public Payment processPayment(PaymentRequestDTO requestDTO) {
-        // 1. Validate booking exists
-        Booking booking = bookingDAO.findById(requestDTO.getBookingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
-
-        // 2. Validate booking is in PENDING status
-        if (!booking.isPending()) {
-            throw new PaymentException("Only PENDING bookings can be paid");
-        }
-
-        // 3. Validate amount matches booking total
-        if (booking.getTotalPrice().compareTo(requestDTO.getAmount()) != 0) {
-            throw new PaymentException("Payment amount does not match booking total");
-        }
-
-        // 4. Create payment record
+    public Payment createPayment(Long bookingId, BigDecimal amount, String paymentMethod) {
+        Booking booking = bookingDAO.findById(bookingId)
+            .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        
         Payment payment = Payment.builder()
-                .booking(booking)
-                .amount(requestDTO.getAmount())
-                .paymentMethod(requestDTO.getPaymentMethod())
-                .status(Payment.PaymentStatus.PENDING)
-                .transactionId(requestDTO.getTransactionId())
-                .build();
-
-        return paymentDAO.save(payment);
-    }
-
-    @Override
-    public Payment markPaymentSuccess(Long paymentId, String transactionId) {
-        Payment payment = paymentDAO.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-
-        // Update payment status
-        payment.setStatus(Payment.PaymentStatus.SUCCESS);
-        payment.setTransactionId(transactionId);
-        Payment savedPayment = paymentDAO.save(payment);
-
-        // Confirm booking (ATOMIC operation)
-        Booking booking = payment.getBooking();
-        booking.confirm();
-        bookingDAO.save(booking);
-
-        return savedPayment;
-    }
-
-    @Override
-    public Payment markPaymentFailed(Long paymentId, String reason) {
-        Payment payment = paymentDAO.findById(paymentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Payment not found"));
-
-        payment.setStatus(Payment.PaymentStatus.FAILED);
+            .booking(booking)
+            .amount(amount)
+            .paymentMethod(paymentMethod)
+            .status(Payment.PaymentStatus.PENDING)
+            .build();
+        
         return paymentDAO.save(payment);
     }
 
@@ -106,4 +54,32 @@ public class PaymentServiceImpl implements PaymentService {
     public List<Payment> findByBookingId(Long bookingId) {
         return paymentDAO.findByBookingId(bookingId);
     }
+
+    @Override
+    public Payment processPayment(Long paymentId, String transactionId) {
+        Payment payment = paymentDAO.findById(paymentId)
+            .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        
+        payment.setStatus(Payment.PaymentStatus.SUCCESS);
+        payment.setTransactionId(transactionId);
+        
+        // Confirm booking
+        Booking booking = payment.getBooking();
+        booking.confirm();
+        bookingDAO.save(booking);
+        
+        return paymentDAO.save(payment);
+    }
+
+    @Override
+    public Payment failPayment(Long paymentId, String reason) {
+        Payment payment = paymentDAO.findById(paymentId)
+            .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+        
+        payment.setStatus(Payment.PaymentStatus.FAILED);
+        payment.setTransactionId("FAILED: " + reason);
+        
+        return paymentDAO.save(payment);
+    }
 }
+

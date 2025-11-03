@@ -1,0 +1,81 @@
+<!-- ============================================================================ -->
+<!-- auth/login.html - Login Page -->
+<!-- ============================================================================ -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Login - SkyReserve')}"></head>
+<body class="bg-light">
+
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </h2>
+                    
+                    <!-- Alerts -->
+                    <div th:replace="~{fragments/layout :: alerts}"></div>
+                    
+                    <form th:action="@{/login}" method="post" th:object="${loginRequest}">
+                        <input type="hidden" name="redirect" th:value="${redirect}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-person"></i> Username
+                            </label>
+                            <input type="text" class="form-control" 
+                                   th:field="*{username}" 
+                                   placeholder="Enter username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-lock"></i> Password
+                            </label>
+                            <input type="password" class="form-control" 
+                                   th:field="*{password}" 
+                                   placeholder="Enter password" required>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <hr class="my-4">
+                    
+                    <p class="text-center mb-0">
+                        Don't have an account? 
+                        <a href="/register" class="fw-bold">Register here</a>
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Demo Accounts Info -->
+            <div class="card mt-3 bg-info bg-opacity-10 border-info">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-info-circle"></i> Demo Accounts
+                    </h6>
+                    <small>
+                        <strong>User:</strong> john_doe / 123456<br>
+                        <strong>Admin:</strong> admin / 123456
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+</body>
+</html>
+
