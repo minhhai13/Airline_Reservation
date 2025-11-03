@@ -23,7 +23,7 @@ public class RecommendationRestController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<FlightResponse>>> getRecommendations(
-            @RequestParam(defaultValue = "5") int limit,
+            @RequestParam(name = "limit", defaultValue = "5") int limit,
             HttpSession session) {
         
         User user = (User) session.getAttribute("user");

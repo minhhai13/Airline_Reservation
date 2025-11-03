@@ -60,7 +60,10 @@ public class FlightDAOImpl implements FlightDAO {
     @Override
     public List<Flight> findByRouteId(Long routeId) {
         return em.createQuery(
-                "SELECT f FROM Flight f WHERE f.route.id = :routeId "
+                "SELECT f FROM Flight f "
+                + "JOIN FETCH f.route "
+                + "JOIN FETCH f.aircraft "
+                + "WHERE f.route.id = :routeId "
                 + "ORDER BY f.departureTime", Flight.class)
                 .setParameter("routeId", routeId)
                 .getResultList();
@@ -72,7 +75,10 @@ public class FlightDAOImpl implements FlightDAO {
         LocalDateTime endOfDay = startOfDay.plusDays(1);
 
         return em.createQuery(
-                "SELECT f FROM Flight f WHERE f.route.id = :routeId "
+                "SELECT f FROM Flight f "
+                + "JOIN FETCH f.route "
+                + "JOIN FETCH f.aircraft "
+                + "WHERE f.route.id = :routeId "
                 + "AND f.departureTime >= :start AND f.departureTime < :end "
                 + "ORDER BY f.departureTime", Flight.class)
                 .setParameter("routeId", routeId)
@@ -84,7 +90,10 @@ public class FlightDAOImpl implements FlightDAO {
     @Override
     public List<Flight> findAvailableFlights() {
         return em.createQuery(
-                "SELECT f FROM Flight f WHERE f.availableSeats > 0 "
+                "SELECT f FROM Flight f "
+                + "JOIN FETCH f.route "
+                + "JOIN FETCH f.aircraft "
+                + "WHERE f.availableSeats > 0 "
                 + "AND f.departureTime > :now ORDER BY f.departureTime", Flight.class)
                 .setParameter("now", LocalDateTime.now())
                 .getResultList();

@@ -114,7 +114,7 @@ public class AdminRestController {
     // Delete flight
     @DeleteMapping("/flights/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteFlight(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             HttpSession session) {
         
         if (!isAdmin(session)) {
@@ -134,7 +134,7 @@ public class AdminRestController {
     // Cancel booking (admin)
     @PostMapping("/bookings/{id}/cancel")
     public ResponseEntity<ApiResponse<Void>> cancelBooking(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             HttpSession session) {
         
         if (!isAdmin(session)) {

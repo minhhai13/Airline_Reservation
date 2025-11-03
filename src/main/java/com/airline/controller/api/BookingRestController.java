@@ -79,7 +79,7 @@ public class BookingRestController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BookingResponse>> getBookingById(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             HttpSession session) {
         
         User user = (User) session.getAttribute("user");
@@ -102,7 +102,7 @@ public class BookingRestController {
 
     @PostMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(
-            @PathVariable Long id,
+            @PathVariable(name = "id") Long id,
             HttpSession session) {
         
         User user = (User) session.getAttribute("user");

@@ -24,10 +24,10 @@ public class FlightController {
 
     @GetMapping("/search")
     public String searchFlights(
-            @RequestParam(required = false) String origin,
-            @RequestParam(required = false) String destination,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(defaultValue = "1") int passengers,
+            @RequestParam(name = "origin", required = false) String origin,
+            @RequestParam(name = "destination", required = false) String destination,
+            @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(name = "passengers", defaultValue = "1") int passengers,
             Model model) {
 
         List<Flight> flights = List.of();

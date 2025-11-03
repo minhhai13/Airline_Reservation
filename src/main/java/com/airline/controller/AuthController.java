@@ -23,7 +23,7 @@ public class AuthController {
 
     // Login Page
     @GetMapping("/login")
-    public String loginPage(@RequestParam(required = false) String redirect,
+    public String loginPage(@RequestParam(name = "redirect", required = false) String redirect,
                            Model model) {
         model.addAttribute("loginRequest", new LoginRequest());
         model.addAttribute("redirect", redirect != null ? redirect : "/");
@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute LoginRequest request,
                        BindingResult result,
-                       @RequestParam(required = false) String redirect,
+                       @RequestParam(name = "redirect", required = false) String redirect,
                        HttpSession session,
                        RedirectAttributes redirectAttributes) {
         

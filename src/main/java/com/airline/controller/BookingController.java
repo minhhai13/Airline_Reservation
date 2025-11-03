@@ -28,8 +28,8 @@ public class BookingController {
 
     // Booking Form Page
     @GetMapping("/{flightId}")
-    public String bookingForm(@PathVariable Long flightId,
-                             @RequestParam(defaultValue = "1") int passengers,
+    public String bookingForm(@PathVariable(name = "flightId") Long flightId,
+                             @RequestParam(name = "passengers", defaultValue = "1") int passengers,
                              HttpSession session,
                              Model model) {
         

@@ -23,9 +23,9 @@ public class PaymentController {
     // Payment result callback from VNPAY
     @GetMapping("/result")
     public String paymentResult(
-            @RequestParam(required = false) String vnp_ResponseCode,
-            @RequestParam(required = false) Long bookingId,
-            @RequestParam(required = false) String transactionId,
+            @RequestParam(name = "vnp_ResponseCode", required = false) String vnp_ResponseCode,
+            @RequestParam(name = "bookingId", required = false) Long bookingId,
+            @RequestParam(name = "transactionId", required = false) String transactionId,
             Model model) {
 
         if (bookingId == null) {

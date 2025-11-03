@@ -22,8 +22,6 @@
                                 expression="org.springframework.web.bind.annotation.RestController"/>
     </context:component-scan>
 
-    <mvc:resources mapping="/assets/**" location="/assets/" />
-    <mvc:resources mapping="/cdn-cgi/**" location="/cdn-cgi/" />
 
     <bean id="templateResolver" 
           class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">

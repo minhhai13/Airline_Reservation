@@ -9,6 +9,7 @@ D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\Reco
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\AuthController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\BookingController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\FlightController.java
+D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\GlobalExceptionHandler.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\HomeController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\PaymentController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\TestController.java
