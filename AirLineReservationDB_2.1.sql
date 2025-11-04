@@ -143,7 +143,7 @@ GO
 -- 1. Users: admin + 4 users (mật khẩu: 123456)
 -- Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 INSERT INTO Users (username, password, email, full_name, role) VALUES
-('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin@airline.com', 'System Administrator', 'ADMIN'),
+('admin', '$2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq', 'admin@airline.com', 'System Administrator', 'ADMIN'),
 ('john_doe', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'john.doe@email.com', 'John Doe', 'USER'),
 ('jane_smith', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'jane.smith@email.com', 'Jane Smith', 'USER'),
 ('bob_wilson', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'bob.wilson@email.com', 'Bob Wilson', 'USER'),

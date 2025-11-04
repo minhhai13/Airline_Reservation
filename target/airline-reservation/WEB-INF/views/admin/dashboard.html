@@ -6,23 +6,23 @@
 <head th:replace="~{fragments/layout :: head('Admin Dashboard - SkyReserve')}"></head>
 <body>
 
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<nav th:replace="~{fragments/layout :: admin-navbar}"></nav>
 
 <main class="container-fluid mt-4">
     <div class="row">
         <!-- Sidebar -->
         <div class="col-md-2">
             <div class="list-group">
-                <a href="/admin/dashboard" class="list-group-item list-group-item-action active">
+                <a th:href="@{/admin/dashboard}" class="list-group-item list-group-item-action active">
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
-                <a href="/admin/flights" class="list-group-item list-group-item-action">
+                <a th:href="@{/admin/flights}" class="list-group-item list-group-item-action">
                     <i class="bi bi-airplane"></i> Flights
                 </a>
-                <a href="/admin/users" class="list-group-item list-group-item-action">
+                <a th:href="@{/admin/users}" class="list-group-item list-group-item-action">
                     <i class="bi bi-people"></i> Users
                 </a>
-                <a href="/admin/bookings" class="list-group-item list-group-item-action">
+                <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action">
                     <i class="bi bi-ticket"></i> Bookings
                 </a>
             </div>

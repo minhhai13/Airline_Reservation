@@ -157,6 +157,62 @@
                 </div>
             </div>
         </nav>
+    <!-- ============================================================================ -->
+    <!-- Admin Navigation Bar Fragment -->
+    <!-- ============================================================================ -->
+    <body>
+        <nav th:fragment="admin-navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" th:href="@{/}">
+                    <i class="bi bi-airplane-fill"></i> SkyReserve
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+        
+
+
+
+
+                        <!-- Admin menu -->
+                        <li class="nav-item dropdown" th:if="${session.user != null && session.user.role.name() == 'ADMIN'}">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-shield-lock"></i> Admin
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" th:href="@{/admin/dashboard}">Dashboard</a></li>
+                                <li><a class="dropdown-item" th:href="@{/admin/flights}">Flights</a></li>
+                                <li><a class="dropdown-item" th:href="@{/admin/users}">Users</a></li>
+                                <li><a class="dropdown-item" th:href="@{/admin/bookings}">Bookings</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- User menu -->
+                        <li class="nav-item dropdown" th:if="${session.user != null}">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle"></i> 
+                                <span th:text="${session.user.username}">User</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" th:href="@{/user/profile}">Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Login/Register buttons -->
+                        <li class="nav-item" th:if="${session.user == null}">
+                            <a class="nav-link" th:href="@{/login}">Login</a>
+                        </li>
+                        <li class="nav-item" th:if="${session.user == null}">
+                            <a class="nav-link btn btn-primary ms-2 text-white" th:href="@{/register}">Register</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
         <!-- ============================================================================ -->
         <!-- Footer Fragment -->
