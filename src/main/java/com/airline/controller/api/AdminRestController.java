@@ -195,6 +195,7 @@ public class AdminRestController {
     }
 
     // Thêm vào src/main/java/com/airline/controller/api/AdminRestController.java
+    // Thêm vào src/main/java/com/airline/controller/api/AdminRestController.java
     @PutMapping("/flights/{id}")
     public ResponseEntity<ApiResponse<FlightResponse>> updateFlight(
             @PathVariable(name = "id") Long id,
@@ -210,13 +211,33 @@ public class AdminRestController {
             Flight existingFlight = flightService.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
 
+            // === SAFETY CHECK (ĐIỂM QUAN TRỌNG NHẤT) ===
+            // Tìm tất cả booking của flight này
+            List<Booking> bookings = bookingService.findByFlightId(id);
+
+            // Đếm số booking "đang hoạt động" (chưa bị huỷ)
+            long activeBookings = bookings.stream()
+                    .filter(b -> b.isPending() || b.isConfirmed())
+                    .count();
+
+            if (activeBookings > 0) {
+                // Nếu có booking, trả về lỗi, không cho update
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error(
+                                "Không thể cập nhật. Chuyến bay này đang có " + activeBookings
+                                + " booking (Pending hoặc Confirmed). Vui lòng huỷ các booking này trước."
+                        ));
+            }
+            // === KẾT THÚC SAFETY CHECK ===
+
+            // Nếu không có booking, tiến hành update như bình thường
             Route route = routeService.findById(request.getRouteId())
                     .orElseThrow(() -> new IllegalArgumentException("Route not found"));
 
             Aircraft aircraft = aircraftDAO.findById(request.getAircraftId())
                     .orElseThrow(() -> new IllegalArgumentException("Aircraft not found"));
 
-            // Update flight properties
+            // Cập nhật thông tin
             existingFlight.setFlightNumber(request.getFlightNumber());
             existingFlight.setDepartureTime(request.getDepartureTime());
             existingFlight.setArrivalTime(request.getArrivalTime());
@@ -234,6 +255,36 @@ public class AdminRestController {
         } catch (Exception e) {
             return ResponseEntity.badRequest()
                     .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+// === API ĐỂ XÓA USER (MỚI) ===
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable(name = "id") Long id,
+            HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Admin access required"));
+        }
+
+        try {
+            // KIỂM TRA AN TOÀN: Không cho admin tự xóa mình
+            User adminUser = (User) session.getAttribute("user");
+            if (adminUser.getId().equals(id)) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponse.error("Cannot delete your own account while logged in."));
+            }
+
+            // Gọi service để xóa
+            userService.deleteUser(id);
+            return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
+
+        } catch (Exception e) {
+            // Bắt lỗi nếu user có khóa ngoại (ví dụ: đã đặt booking)
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error("Could not delete user. They may have existing bookings."));
         }
     }
 

@@ -157,9 +157,9 @@
                 </div>
             </div>
         </nav>
-    <!-- ============================================================================ -->
-    <!-- Admin Navigation Bar Fragment -->
-    <!-- ============================================================================ -->
+        <!-- ============================================================================ -->
+        <!-- Admin Navigation Bar Fragment -->
+        <!-- ============================================================================ -->
     <body>
         <nav th:fragment="admin-navbar" class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
@@ -171,7 +171,7 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-        
+
 
 
 
@@ -344,9 +344,10 @@
                         <h5 class="card-title">
                             <i class="bi bi-airplane-fill"></i>
                             <span th:text="${booking.flight.flightNumber}">VN101</span>
+                            
                             <span class="badge ms-2" 
-                                  th:classappend="${booking.status == 'CONFIRMED' ? 'badge-status-confirmed' : 
-                                  (booking.status == 'PENDING' ? 'badge-status-pending' : 'badge-status-cancelled')}"
+                                  th:classappend="${booking.status.toString() == 'CONFIRMED' ? 'badge-status-confirmed' : 
+                                  (booking.status.toString() == 'PENDING' ? 'badge-status-pending' : 'badge-status-cancelled')}"
                                   th:text="${booking.status}">CONFIRMED</span>
                         </h5>
                         <p class="mb-1">
@@ -366,10 +367,20 @@
                                 01/11/2025 10:30
                             </span>
                         </p>
-                        <p class="mb-0">
-                            Passengers: <span th:text="${#lists.size(booking.passengers)}">1</span>
+                        <p class="mb-1"> Passengers: <span th:text="${#lists.size(booking.passengers)}">1</span>
                         </p>
-                    </div>
+
+                        <div class="mt-2" th:if="${booking.passengers != null and not #lists.isEmpty(booking.passengers)}">
+                            <ul class="list-unstyled list-inline mb-0">
+                                <li class="list-inline-item" th:each="passenger : ${booking.passengers}">
+                                    <span class="badge bg-secondary fw-normal">
+                                        <i class="bi bi-person-fill"></i> 
+                                        <span th:text="${passenger.fullName}">John Doe</span>
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                        </div>
                     <div class="col-md-4 text-end">
                         <h4 class="text-primary" 
                             th:text="${#numbers.formatDecimal(booking.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'">
