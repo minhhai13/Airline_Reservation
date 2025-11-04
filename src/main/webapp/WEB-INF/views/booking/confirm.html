@@ -96,12 +96,16 @@
         <div th:replace="~{fragments/layout :: scripts}"></div>
 
         <script th:inline="javascript">
+            // === BƯỚC 1: Thêm contextPath (Giống hệt search.html) ===
+            const contextPath = /*[[@{/}]]*/ '/';
+
             async function processPayment() {
                 const bookingRequest = /*[[${bookingRequest}]]*/ {};
 
                 try {
+                    // === BƯỚC 2: Thêm contextPath vào fetch ===
                     // Step 1: Create booking
-                    const bookingResponse = await fetch('/api/bookings/create', {
+                    const bookingResponse = await fetch(contextPath + 'api/bookings/create', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify(bookingRequest)
@@ -116,8 +120,9 @@
 
                     const bookingId = bookingResult.data.id;
 
+                    // === BƯỚC 2: Thêm contextPath vào fetch ===
                     // Step 2: Create payment
-                    const paymentResponse = await fetch('/api/payment/create', {
+                    const paymentResponse = await fetch(contextPath + 'api/payment/create', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
@@ -130,7 +135,7 @@
                     const paymentResult = await paymentResponse.json();
 
                     if (paymentResult.success) {
-                        // Redirect to VNPAY (or payment result page for testing)
+                        // Redirect to VNPAY
                         window.location.href = paymentResult.data.paymentUrl;
                     } else {
                         alert('Payment failed: ' + paymentResult.message);
