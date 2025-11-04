@@ -3,169 +3,170 @@
 <!-- ============================================================================ -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Book Flight - SkyReserve')}"></head>
-<body>
+    <head th:replace="~{fragments/layout :: head('Book Flight - SkyReserve')}"></head>
+    <body>
 
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+        <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<main class="container mt-4">
-    <div class="row">
-        <!-- Left: Flight Info -->
-        <div class="col-md-4">
-            <div class="card sticky-top" style="top: 80px;">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="bi bi-airplane-fill"></i> Flight Details
-                    </h5>
+        <main class="container mt-4">
+            <div class="row">
+                <!-- Left: Flight Info -->
+                <div class="col-md-4">
+                    <div class="card sticky-top" style="top: 80px;">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-airplane-fill"></i> Flight Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-primary" th:text="${flight.flightNumber}">VN101</h6>
+                            <hr>
+                            <p class="mb-2">
+                                <strong>From:</strong> 
+                                <span th:text="${flight.route.origin}">Hanoi</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>To:</strong> 
+                                <span th:text="${flight.route.destination}">Ho Chi Minh City</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Departure:</strong><br>
+                                <span th:text="${#temporals.format(flight.departureTime, 'HH:mm, dd/MM/yyyy')}">
+                                    06:00, 05/11/2025
+                                </span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Arrival:</strong><br>
+                                <span th:text="${#temporals.format(flight.arrivalTime, 'HH:mm, dd/MM/yyyy')}">
+                                    08:15, 05/11/2025
+                                </span>
+                            </p>
+                            <hr>
+                            <p class="mb-2">
+                                <strong>Price per ticket:</strong><br>
+                                <span class="h5 text-primary" 
+                                      th:text="${#numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                    1,500,000 VND
+                                </span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Passengers:</strong> 
+                                <span th:text="${passengerCount}">1</span>
+                            </p>
+                            <hr>
+                            <h5 class="text-primary">
+                                Total: 
+                                <span th:text="${#numbers.formatDecimal(flight.price * passengerCount, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                    1,500,000 VND
+                                </span>
+                            </h5>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <h6 class="text-primary" th:text="${flight.flightNumber}">VN101</h6>
-                    <hr>
-                    <p class="mb-2">
-                        <strong>From:</strong> 
-                        <span th:text="${flight.route.origin}">Hanoi</span>
-                    </p>
-                    <p class="mb-2">
-                        <strong>To:</strong> 
-                        <span th:text="${flight.route.destination}">Ho Chi Minh City</span>
-                    </p>
-                    <p class="mb-2">
-                        <strong>Departure:</strong><br>
-                        <span th:text="${#temporals.format(flight.departureTime, 'HH:mm, dd/MM/yyyy')}">
-                            06:00, 05/11/2025
-                        </span>
-                    </p>
-                    <p class="mb-2">
-                        <strong>Arrival:</strong><br>
-                        <span th:text="${#temporals.format(flight.arrivalTime, 'HH:mm, dd/MM/yyyy')}">
-                            08:15, 05/11/2025
-                        </span>
-                    </p>
-                    <hr>
-                    <p class="mb-2">
-                        <strong>Price per ticket:</strong><br>
-                        <span class="h5 text-primary" 
-                              th:text="${#numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
-                            1,500,000 VND
-                        </span>
-                    </p>
-                    <p class="mb-2">
-                        <strong>Passengers:</strong> 
-                        <span th:text="${passengerCount}">1</span>
-                    </p>
-                    <hr>
-                    <h5 class="text-primary">
-                        Total: 
-                        <span th:text="${#numbers.formatDecimal(flight.price * passengerCount, 0, 'COMMA', 0, 'POINT')} + ' VND'">
-                            1,500,000 VND
-                        </span>
-                    </h5>
+
+                <!-- Right: Passenger Form -->
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-person-fill"></i> Passenger Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/booking/confirm}" method="get" id="bookingForm">
+                                <input type="hidden" name="flightId" th:value="${flight.id}">
+
+                                <div th:each="passenger, iterStat : ${bookingRequest.passengers}" class="mb-4">
+                                    <h6 class="bg-light p-2 rounded">
+                                        <i class="bi bi-person-circle"></i>
+                                        Passenger <span th:text="${iterStat.index + 1}">1</span>
+                                    </h6>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Full Name *</label>
+                                            <input type="text" class="form-control" 
+                                                   th:name="'passengers[' + ${iterStat.index} + '].fullName'"
+                                                   th:value="${passenger.fullName}"
+                                                   placeholder="Enter full name" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email *</label>
+                                            <input type="email" class="form-control" 
+                                                   th:name="'passengers[' + ${iterStat.index} + '].email'"
+                                                   th:value="${passenger.email}"
+                                                   placeholder="email@example.com" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Phone *</label>
+                                            <input type="tel" class="form-control" 
+                                                   th:name="'passengers[' + ${iterStat.index} + '].phone'"
+                                                   th:value="${passenger.phone}"
+                                                   placeholder="(+84) 912-345-xxx" 
+                                                   pattern="[0-9]{10,15}" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Seat Preference (Optional)</label>
+                                            <select class="form-select" 
+                                                    th:name="'passengers[' + ${iterStat.index} + '].seatNumber'">
+                                                <option value="">No preference</option>
+                                                <option value="Window">Window</option>
+                                                <option value="Aisle">Aisle</option>
+                                                <option value="Middle">Middle</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-arrow-right-circle"></i> Continue to Payment
+                                    </button>
+                                    <a th:href="@{/flights/search}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left"></i> Back to Search
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Right: Passenger Form -->
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="bi bi-person-fill"></i> Passenger Information
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form th:action="@{/booking/confirm}" method="get" id="bookingForm">
-                        <input type="hidden" name="flightId" th:value="${flight.id}">
-                        
-                        <div th:each="passenger, iterStat : ${bookingRequest.passengers}" class="mb-4">
-                            <h6 class="bg-light p-2 rounded">
-                                <i class="bi bi-person-circle"></i>
-                                Passenger <span th:text="${iterStat.index + 1}">1</span>
-                            </h6>
-                            
-                            <div class="row g-3 mt-2">
-                                <div class="col-md-6">
-                                    <label class="form-label">Full Name *</label>
-                                    <input type="text" class="form-control" 
-                                           th:name="'passengers[' + ${iterStat.index} + '].fullName'"
-                                           th:value="${passenger.fullName}"
-                                           placeholder="Enter full name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email *</label>
-                                    <input type="email" class="form-control" 
-                                           th:name="'passengers[' + ${iterStat.index} + '].email'"
-                                           th:value="${passenger.email}"
-                                           placeholder="email@example.com" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Phone *</label>
-                                    <input type="tel" class="form-control" 
-                                           th:name="'passengers[' + ${iterStat.index} + '].phone'"
-                                           th:value="${passenger.phone}"
-                                           placeholder="0901234567" 
-                                           pattern="[0-9]{10,15}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Seat Preference (Optional)</label>
-                                    <select class="form-select" 
-                                            th:name="'passengers[' + ${iterStat.index} + '].seatNumber'">
-                                        <option value="">No preference</option>
-                                        <option value="Window">Window</option>
-                                        <option value="Aisle">Aisle</option>
-                                        <option value="Middle">Middle</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <div th:replace="~{fragments/layout :: scripts}"></div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-arrow-right-circle"></i> Continue to Payment
-                            </button>
-                            <a th:href="@{/flights/search}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Back to Search
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
+        <script th:inline="javascript">
+            // Store booking data in session before redirect
+            document.getElementById('bookingForm').addEventListener('submit', function (e) {
+                e.preventDefault();
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-<div th:replace="~{fragments/layout :: scripts}"></div>
+                // Gather form data
+                const formData = new FormData(this);
+                const passengers = [];
 
-<script>
-    // Store booking data in session before redirect
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Gather form data
-        const formData = new FormData(this);
-        const passengers = [];
-        
-        // Parse passenger data
-        const passengerCount = [[${passengerCount}]];
-        for (let i = 0; i < passengerCount; i++) {
-            passengers.push({
-                fullName: formData.get(`passengers[${i}].fullName`),
-                email: formData.get(`passengers[${i}].email`),
-                phone: formData.get(`passengers[${i}].phone`),
-                seatNumber: formData.get(`passengers[${i}].seatNumber`)
+                // Parse passenger data
+                const passengerCount = /*[[${passengerCount}]]*/ 1;
+                for (let i = 0; i < passengerCount; i++) {
+                    passengers.push({
+                        fullName: formData.get(`passengers[${i}].fullName`),
+                        email: formData.get(`passengers[${i}].email`),
+                        phone: formData.get(`passengers[${i}].phone`),
+                        seatNumber: formData.get(`passengers[${i}].seatNumber`)
+                    });
+                }
+
+                // Store in sessionStorage temporarily
+                sessionStorage.setItem('bookingData', JSON.stringify({
+                    flightId: formData.get('flightId'),
+                    passengers: passengers
+                }));
+
+                // Redirect to confirmation (ĐÃ SỬA)
+                const confirmUrl = /*[[@{/booking/confirm}]]*/ '/booking/confirm';
+                window.location.href = confirmUrl;
             });
-        }
-        
-        // Store in sessionStorage temporarily
-        sessionStorage.setItem('bookingData', JSON.stringify({
-            flightId: formData.get('flightId'),
-            passengers: passengers
-        }));
-        
-        // Redirect to confirmation
-        window.location.href = '/booking/confirm';
-    });
-</script>
+        </script>
 
-</body>
+    </body>
 </html>

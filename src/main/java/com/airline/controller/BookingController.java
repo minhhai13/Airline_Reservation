@@ -7,7 +7,7 @@ import com.airline.entity.Flight;
 import com.airline.entity.User;
 import com.airline.service.BookingService;
 import com.airline.service.FlightService;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession; // <--- Đảm bảo đã import
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,24 +29,38 @@ public class BookingController {
     // Booking Form Page
     @GetMapping("/{flightId}")
     public String bookingForm(@PathVariable(name = "flightId") Long flightId,
-                             @RequestParam(name = "passengers", defaultValue = "1") int passengers,
-                             HttpSession session,
-                             Model model) {
-        
+            @RequestParam(name = "passengers", defaultValue = "1") int passengers,
+            HttpSession session, // <--- Lấy session
+            Model model) {
+
+        // ==================================================
+        // === LOGIC MỚI: KIỂM TRA ĐĂNG NHẬP TRƯỚC ===
+        // ==================================================
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            // Nếu chưa đăng nhập, chuyển hướng đến trang login
+            // Tạo URL để quay lại sau khi login thành công
+            String redirectUrl = String.format("/booking/%d?passengers=%d", flightId, passengers);
+            return "redirect:/login?redirect=" + redirectUrl;
+        }
+        // ==================================================
+        // === KẾT THÚC LOGIC MỚI ===
+        // ==================================================
+
+        // Logic cũ: Chỉ chạy khi người dùng ĐÃ đăng nhập
         Flight flight = flightService.findById(flightId)
-            .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
 
         if (!flight.hasAvailableSeats(passengers)) {
             throw new IllegalStateException("Not enough available seats");
         }
 
-        // Pre-fill with user info if logged in
-        User user = (User) session.getAttribute("user");
+        // Pre-fill with user info (chắc chắn user không null ở đây)
         List<PassengerInfo> passengerList = new ArrayList<>();
-        
+
         for (int i = 0; i < passengers; i++) {
             PassengerInfo p = new PassengerInfo();
-            if (i == 0 && user != null) {
+            if (i == 0) { // Tự động điền cho hành khách đầu tiên
                 p.setFullName(user.getFullName());
                 p.setEmail(user.getEmail());
             }
@@ -61,7 +75,7 @@ public class BookingController {
         model.addAttribute("bookingRequest", bookingRequest);
         model.addAttribute("passengerCount", passengers);
 
-        return "booking/form";
+        return "booking/form"; // Hiển thị trang form
     }
 
     // Booking Confirmation Page (requires login)
@@ -69,6 +83,8 @@ public class BookingController {
     public String confirmationPage(HttpSession session, Model model) {
         User user = (User) session.getAttribute("user");
         if (user == null) {
+            // Mặc dù đã check ở /booking/{flightId},
+            // giữ lại check này vẫn tốt để phòng trường hợp người dùng bookmark URL
             return "redirect:/login?redirect=/booking/confirm";
         }
 
@@ -78,7 +94,7 @@ public class BookingController {
         }
 
         Flight flight = flightService.findById(bookingRequest.getFlightId())
-            .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
 
         model.addAttribute("flight", flight);
         model.addAttribute("bookingRequest", bookingRequest);
@@ -87,4 +103,3 @@ public class BookingController {
         return "booking/confirm";
     }
 }
-
