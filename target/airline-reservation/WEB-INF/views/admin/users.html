@@ -67,10 +67,10 @@
                                                 01/11/2025
                                             </td>
                                             <td>
-                                                <button class="btn btn-sm btn-outline-info" 
-                                                        th:onclick="'viewUserDetails(' + ${user.id} + ')'">
+                                                <a class="btn btn-sm btn-outline-info" 
+                                                        th:href="@{/admin/{id}(id=${user.id})}">
                                                     <i class="bi bi-eye"></i> View
-                                                </button>
+                                                </a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -84,13 +84,6 @@
 
         <footer th:replace="~{fragments/layout :: footer}"></footer>
         <div th:replace="~{fragments/layout :: scripts}"></div>
-
-        <script>
-            function viewUserDetails(userId) {
-                alert('User details for ID: ' + userId);
-                // Implementation coming soon
-            }
-        </script>
 
     </body>
 </html>

@@ -6,9 +6,9 @@ public class VNPayConfig {
     public static String vnp_HashSecret = "LIH4VEKXUWE99G9XZBP0BOYIF7X1U1M4";
     public static String vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
-    // === SỬA LỖI: XÓA /airline KHỎI ĐÂY ===
+    // === SỬA LỖI: THÊM /airline TRỞ LẠI ===
     // URL này phải khớp với URL "Forwarding" mà ngrok trả về
-    public static String vnp_ReturnUrl = "https://pseudorheumatic-leslie-noncaustic.ngrok-free.dev/payment/result";
+    public static String vnp_ReturnUrl = "https://pseudorheumatic-leslie-noncaustic.ngrok-free.dev/airline/payment/result";
 
     public static String getRandomNumber(int len) {
         String chars = "0123456789";

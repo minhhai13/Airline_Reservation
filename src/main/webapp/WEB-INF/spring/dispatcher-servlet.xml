@@ -25,8 +25,6 @@
         <context:include-filter type="annotation" 
                                 expression="org.springframework.web.bind.annotation.RestController"/>
     </context:component-scan>
-
-
     <bean id="templateResolver" 
           class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
         <property name="prefix" value="/WEB-INF/views/" />
@@ -47,7 +45,6 @@
         <property name="characterEncoding" value="UTF-8" />
         <property name="order" value="1" />
     </bean>
-
     <bean id="multipartResolver" 
           class="org.springframework.web.multipart.support.StandardServletMultipartResolver" />
 </beans>

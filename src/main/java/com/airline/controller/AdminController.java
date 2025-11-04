@@ -32,6 +32,14 @@ public class AdminController {
         return user != null && user.isAdmin();
     }
 
+    @GetMapping("/{userId}")
+    public String bookingForm(@PathVariable(name = "userId") Long userId,
+            Model model) {
+        User user = userService.findById(userId).get();
+        model.addAttribute("user", user);
+        return "admin/profile";
+    }
+
     // Admin Dashboard
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
@@ -48,19 +56,19 @@ public class AdminController {
         long cancelledCount = allBookings.stream().filter(Booking::isCancelled).count();
 
         BigDecimal totalRevenue = allBookings.stream()
-            .filter(Booking::isConfirmed)
-            .map(Booking::getTotalPrice)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .filter(Booking::isConfirmed)
+                .map(Booking::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         DashboardStats stats = DashboardStats.builder()
-            .totalUsers((long) allUsers.size())
-            .totalFlights((long) allFlights.size())
-            .totalBookings((long) allBookings.size())
-            .pendingBookings(pendingCount)
-            .confirmedBookings(confirmedCount)
-            .cancelledBookings(cancelledCount)
-            .totalRevenue(totalRevenue)
-            .build();
+                .totalUsers((long) allUsers.size())
+                .totalFlights((long) allFlights.size())
+                .totalBookings((long) allBookings.size())
+                .pendingBookings(pendingCount)
+                .confirmedBookings(confirmedCount)
+                .cancelledBookings(cancelledCount)
+                .totalRevenue(totalRevenue)
+                .build();
 
         model.addAttribute("stats", stats);
         return "admin/dashboard";
@@ -102,4 +110,3 @@ public class AdminController {
         return "admin/bookings";
     }
 }
-
