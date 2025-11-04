@@ -107,4 +107,39 @@ public class FlightDAOImpl implements FlightDAO {
             em.remove(em.merge(flight));
         }
     }
+
+    @Override
+    public List<Flight> findByRouteAndDate(Long routeId, LocalDateTime date, int page, int size) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+        return em.createQuery(
+                "SELECT f FROM Flight f "
+                + "JOIN FETCH f.route "
+                + "JOIN FETCH f.aircraft "
+                + "WHERE f.route.id = :routeId "
+                + "AND f.departureTime >= :start AND f.departureTime < :end "
+                + "ORDER BY f.departureTime", Flight.class)
+                .setParameter("routeId", routeId)
+                .setParameter("start", startOfDay)
+                .setParameter("end", endOfDay)
+                .setFirstResult(page * size)
+                .setMaxResults(size)
+                .getResultList();
+    }
+
+    @Override
+    public long countByRouteAndDate(Long routeId, LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1);
+
+        return em.createQuery(
+                "SELECT COUNT(f) FROM Flight f "
+                + "WHERE f.route.id = :routeId "
+                + "AND f.departureTime >= :start AND f.departureTime < :end", Long.class)
+                .setParameter("routeId", routeId)
+                .setParameter("start", startOfDay)
+                .setParameter("end", endOfDay)
+                .getSingleResult();
+    }
 }

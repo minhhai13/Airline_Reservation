@@ -1,108 +1,406 @@
-<!-- ============================================================================ -->
-<!-- flights/search.html - Flight Search Results -->
-<!-- ============================================================================ -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Search Flights - SkyReserve')}"></head>
-<body>
+    <head th:replace="~{fragments/layout :: head('Search Flights - SkyReserve')}"></head>
+    <body>
 
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+        <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<main class="container mt-4">
-    <h2 class="mb-4">
-        <i class="bi bi-search"></i> Search Results
-        <span class="badge bg-primary" th:text="${#lists.size(flights)} + ' flights found'">
-            0 flights found
-        </span>
-    </h2>
+        <main class="container mt-4">
+            <h2 class="mb-4">
+                <i class="bi bi-search"></i> Search Results
+                <span class="badge bg-primary" id="flightCountBadge">
+                    <th:block th:if="${totalFlights != null}">[[${totalFlights}]] flights found</th:block>
+                    <th:block th:unless="${totalFlights != null}">0 flights found</th:block>
+                </span>
+            </h2>
 
-    <!-- Search Form -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form th:action="@{/flights/search}" method="get" id="searchForm">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">From</label>
-                        <select class="form-select" name="origin" th:value="${origin}">
-                            <option value="">Select Origin</option>
-                            <option th:each="city : ${origins}" 
-                                    th:value="${city}" 
-                                    th:text="${city}"
-                                    th:selected="${city == origin}">Hanoi</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">To</label>
-                        <select class="form-select" name="destination" th:value="${destination}">
-                            <option value="">Select Destination</option>
-                            <option th:each="city : ${destinations}" 
-                                    th:value="${city}" 
-                                    th:text="${city}"
-                                    th:selected="${city == destination}">Ho Chi Minh City</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Date</label>
-                        <input type="date" class="form-control" name="date" 
-                               th:value="${date}">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Passengers</label>
-                        <input type="number" class="form-control" name="passengers" 
-                               th:value="${passengers}" min="1" max="9">
-                    </div>
-                    <div class="col-md-1 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
+            <!-- Search Form -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form id="searchForm">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">From</label>
+                                <select class="form-select" name="origin" id="origin" required>
+                                    <option value="">Select Origin</option>
+                                    <option th:each="city : ${origins}" 
+                                            th:value="${city}" 
+                                            th:text="${city}"
+                                            th:selected="${city == origin}">Hanoi</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">To</label>
+                                <select class="form-select" name="destination" id="destination" required>
+                                    <option value="">Select Destination</option>
+                                    <option th:each="city : ${destinations}" 
+                                            th:value="${city}" 
+                                            th:text="${city}"
+                                            th:selected="${city == destination}">Ho Chi Minh City</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" name="date" id="date" 
+                                       th:value="${date}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Passengers</label>
+                                <input type="number" class="form-control" name="passengers" id="passengers"
+                                       th:value="${passengers}" min="1" max="9" required>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- Flight Results -->
-    <div id="flightResults">
-        <div th:if="${#lists.isEmpty(flights)}" class="text-center py-5">
-            <i class="bi bi-airplane display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">No flights found</h4>
-            <p>Try adjusting your search criteria</p>
-        </div>
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3">Searching flights...</p>
+            </div>
 
-        <div th:each="flight : ${flights}">
-            <div th:replace="~{fragments/layout :: flight-card(${flight})}"></div>
-        </div>
-    </div>
-</main>
+            <!-- Flight Results -->
+            <div id="flightResults">
+                <!-- No results message -->
+                <div id="noResultsMessage" style="display: none;" class="text-center py-5">
+                    <i class="bi bi-airplane display-1 text-muted"></i>
+                    <h4 class="mt-3 text-muted">No flights found</h4>
+                    <p>Try adjusting your search criteria</p>
+                </div>
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-<div th:replace="~{fragments/layout :: scripts}"></div>
+                <!-- Flight cards container -->
+                <div id="flightCardsContainer">
+                    <!-- Initial flights from server -->
+                    <th:block th:if="${flights != null and not #lists.isEmpty(flights)}">
+                        <th:block th:each="flight : ${flights}">
+                            <div th:replace="~{fragments/layout :: flight-card(${flight})}"></div>
+                        </th:block>
+                    </th:block>
+                    <th:block th:if="${flights == null or #lists.isEmpty(flights)}">
+                        <div class="text-center py-5">
+                            <i class="bi bi-airplane display-1 text-muted"></i>
+                            <h4 class="mt-3 text-muted">No flights found</h4>
+                            <p>Try adjusting your search criteria</p>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
 
-<script>
-    // AJAX pagination (optional enhancement)
-    async function loadFlights(page) {
-        const form = document.getElementById('searchForm');
-        const formData = new FormData(form);
-        const params = new URLSearchParams(formData);
-        params.append('page', page);
-        
-        try {
-            const response = await fetch('/api/flights?' + params.toString());
-            const result = await response.json();
-            
-            if (result.success) {
-                updateFlightList(result.data);
+            <!-- Pagination -->
+            <div id="paginationWrapper" th:if="${totalPages != null and totalPages > 0}">
+                <nav aria-label="Flight pagination" id="paginationNav">
+                    <ul class="pagination justify-content-center mt-4" id="paginationContainer">
+                        <!-- Will be rendered by JavaScript or Thymeleaf -->
+                    </ul>
+
+                    <!-- Page info -->
+                    <div class="text-center text-muted mb-4" id="pageInfo">
+                        <small>Page <span id="currentPageDisplay">[[${currentPage + 1}]]</span> 
+                            of <span id="totalPagesDisplay">[[${totalPages}]]</span></small>
+                    </div>
+                </nav>
+            </div>
+        </main>
+
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <div th:replace="~{fragments/layout :: scripts}"></div>
+
+        <script th:inline="javascript">
+            // Initialize search criteria from Thymeleaf
+            let currentSearchCriteria = {
+                origin: /*[[${origin}]]*/ '',
+                destination: /*[[${destination}]]*/ '',
+                date: /*[[${date}]]*/ '',
+                passengers: /*[[${passengers}]]*/ 1
+            };
+
+            // Initialize pagination on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                const totalPages = /*[[${totalPages}]]*/ 0;
+                const currentPage = /*[[${currentPage}]]*/ 0;
+
+                if (totalPages > 0) {
+                    renderPaginationButtons(currentPage, totalPages);
+                }
+            });
+
+            // Form submit handler
+            document.getElementById('searchForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Update search criteria
+                currentSearchCriteria = {
+                    origin: document.getElementById('origin').value,
+                    destination: document.getElementById('destination').value,
+                    date: document.getElementById('date').value,
+                    passengers: parseInt(document.getElementById('passengers').value)
+                };
+
+                console.log('Search criteria:', currentSearchCriteria);
+
+                // Load page 0 (first page)
+                searchFlights(0);
+            });
+
+            // Load specific page (called from pagination buttons)
+            window.loadPage = function (event, pageNum) {
+                event.preventDefault();
+                console.log('Loading page:', pageNum);
+                searchFlights(pageNum);
+            };
+
+            // AJAX search flights
+            async function searchFlights(page) {
+                const {origin, destination, date, passengers} = currentSearchCriteria;
+
+                if (!origin || !destination || !date) {
+                    alert('Please fill in all search fields');
+                    return;
+                }
+
+                // Show loading spinner
+                showLoading(true);
+
+                try {
+                    const params = new URLSearchParams({
+                        origin: origin,
+                        destination: destination,
+                        date: date,
+                        page: page,
+                        size: 10
+                    });
+
+                    const searchUrl = /*[[@{/api/flights/search}]]*/ '/api/flights/search';
+
+                    console.log('Fetching:', `${searchUrl}?${params.toString()}`);
+
+                    const response = await fetch(`${searchUrl}?${params.toString()}`);
+
+                    console.log('Response status:', response.status);
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Error response:', errorText);
+                        throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('Search result:', result);
+
+                    if (result.success) {
+                        renderFlights(result.data);
+                        renderPaginationButtons(result.data.currentPage, result.data.totalPages);
+                        updateFlightCount(result.data.totalFlights);
+
+                        // Show/hide pagination
+                        const paginationWrapper = document.getElementById('paginationWrapper');
+                        if (result.data.totalPages > 0) {
+                            paginationWrapper.style.display = 'block';
+                        } else {
+                            paginationWrapper.style.display = 'none';
+                        }
+                    } else {
+                        showError(result.message || 'Search failed');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showError('An error occurred: ' + error.message);
+                } finally {
+                    showLoading(false);
+                }
             }
-        } catch (error) {
-            console.error('Error loading flights:', error);
-        }
-    }
-    
-    function updateFlightList(flights) {
-        // Update DOM with flight data
-        // Implementation depends on API structure
-    }
-</script>
 
-</body>
+            // Render flight cards
+            function renderFlights(data) {
+                const container = document.getElementById('flightCardsContainer');
+                const noResultsMsg = document.getElementById('noResultsMessage');
+
+                if (!data.flights || data.flights.length === 0) {
+                    container.innerHTML = '';
+                    noResultsMsg.style.display = 'block';
+                    return;
+                }
+
+                noResultsMsg.style.display = 'none';
+                container.innerHTML = data.flights.map(flight => createFlightCard(flight)).join('');
+            }
+
+            // Create flight card HTML
+            function createFlightCard(flight) {
+
+                // THAY THẾ HÀM CŨ BẰNG HÀM MỚI NÀY
+                const formatDateTime = (apiDate) => {
+                    let dateObj;
+
+                    if (Array.isArray(apiDate)) {
+                        // Xử lý JSON dạng mảng: [YYYY, MM, DD, HH, MM]
+                        // Lưu ý: Tháng của Java (MM) là 1-12, tháng của JS là 0-11, nên ta trừ 1
+                        dateObj = new Date(
+                                apiDate[0], apiDate[1] - 1, apiDate[2],
+                                apiDate[3], apiDate[4]
+                                );
+                    } else if (typeof apiDate === 'string') {
+                        // Xử lý JSON dạng chuỗi: "2025-11-05T06:00:00"
+                        dateObj = new Date(apiDate);
+                    } else {
+                        return "Invalid Date"; // Dự phòng
+                    }
+
+                    // Kiểm tra nếu parsing vẫn thất bại
+                    if (isNaN(dateObj.getTime())) {
+                        return "NaN:NaN, NaN/NaN/NaN";
+                    }
+
+                    const day = String(dateObj.getDate()).padStart(2, '0');
+                    const month = String(dateObj.getMonth() + 1).padStart(2, '0'); // +1 vì getMonth() là 0-11
+                    const year = dateObj.getFullYear();
+                    const hours = String(dateObj.getHours()).padStart(2, '0');
+                    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+                    return `${hours}:${minutes}, ${day}/${month}/${year}`;
+                };
+
+                const formatPrice = (price) => {
+                    return new Intl.NumberFormat('vi-VN').format(price);
+                };
+
+                return `
+                    <div class="card flight-card mb-3">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <h5 class="mb-0 text-primary">${flight.flightNumber}</h5>
+                                    <small class="text-muted">${flight.aircraftModel || 'N/A'}</small>
+                                </div>
+                                <div class="col-md-3">
+                                    <div>
+                                        <strong>${flight.route.origin}</strong>
+                                        <div class="text-muted">${formatDateTime(flight.departureTime)}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <i class="bi bi-arrow-right fs-3 text-primary"></i>
+                                    <div>
+                                        <small class="text-muted">${flight.route.distanceKm} km</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div>
+                                        <strong>${flight.route.destination}</strong>
+                                        <div class="text-muted">${formatDateTime(flight.arrivalTime)}</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <h4 class="text-primary mb-0">${formatPrice(flight.price)} VND</h4>
+                                    <small class="text-success">
+                                        <i class="bi bi-check-circle"></i> ${flight.availableSeats} seats
+                                    </small>
+                                    <div class="mt-2">
+                                        <a href="/booking/${flight.id}?passengers=${currentSearchCriteria.passengers}" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="bi bi-ticket"></i> Book Now
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Render pagination buttons
+            function renderPaginationButtons(currentPage, totalPages) {
+                // 1. CẬP NHẬT TEXT NGAY LẬP TỨC
+                // (Chuyển 2 dòng này từ dưới lên)
+                document.getElementById('currentPageDisplay').textContent = currentPage + 1;
+                document.getElementById('totalPagesDisplay').textContent = totalPages;
+                
+                const container = document.getElementById('paginationContainer');
+
+                // 2. Nếu chỉ 1 trang, xóa nút và thoát
+                if (totalPages <= 1) {
+                    container.innerHTML = '';
+                    return;
+                }
+                
+                // 3. Nếu nhiều hơn 1 trang, tạo nút
+                let html = '';
+                
+                // Previous button
+                const prevDisabled = currentPage === 0 ? 'disabled' : '';
+                html += `
+                    <li class="page-item ${prevDisabled}">
+                        <a class="page-link" href="#" onclick="loadPage(event, ${currentPage - 1})" 
+                           ${prevDisabled ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                `;
+
+                // Page numbers (max 10 visible)
+                const maxVisible = 10;
+                let startPage = Math.max(0, currentPage - Math.floor(maxVisible / 2));
+                let endPage = Math.min(totalPages, startPage + maxVisible);
+
+                if (endPage - startPage < maxVisible) {
+                    startPage = Math.max(0, endPage - maxVisible);
+                }
+
+                for (let i = startPage; i < endPage; i++) {
+                    const active = i === currentPage ? 'active' : '';
+                    html += `
+                        <li class="page-item ${active}">
+                            <a class="page-link" href="#" onclick="loadPage(event, ${i})">${i + 1}</a>
+                        </li>
+                    `;
+                }
+
+                // Next button
+                const nextDisabled = currentPage >= totalPages - 1 ? 'disabled' : '';
+                html += `
+                    <li class="page-item ${nextDisabled}">
+                        <a class="page-link" href="#" onclick="loadPage(event, ${currentPage + 1})"
+                           ${nextDisabled ? 'tabindex="-1" aria-disabled="true"' : ''}>
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                `;
+                
+                container.innerHTML = html;
+
+                // (Không còn 2 dòng cập nhật text ở đây nữa)
+            }
+
+            // Update flight count badge
+            function updateFlightCount(count) {
+                const badge = document.getElementById('flightCountBadge');
+                badge.textContent = `${count} flights found`;
+            }
+
+            // Show/hide loading spinner
+            function showLoading(show) {
+                document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+                document.getElementById('flightResults').style.display = show ? 'none' : 'block';
+            }
+
+            // Show error message
+            function showError(message) {
+                const container = document.getElementById('flightCardsContainer');
+                container.innerHTML = `
+                    <div class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> ${message}
+                    </div>
+                `;
+                document.getElementById('noResultsMessage').style.display = 'none';
+            }
+        </script>
+
+    </body>
 </html>

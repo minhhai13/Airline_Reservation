@@ -25,4 +25,8 @@ public interface FlightDAO {
     List<Flight> findAvailableFlights();
 
     void delete(Flight flight);
+
+    List<Flight> findByRouteAndDate(Long routeId, LocalDateTime date, int page, int size);
+
+    long countByRouteAndDate(Long routeId, LocalDateTime date);
 }
