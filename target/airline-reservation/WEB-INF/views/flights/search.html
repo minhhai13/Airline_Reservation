@@ -95,7 +95,7 @@
             </div>
 
             <!-- Pagination -->
-            <div id="paginationWrapper" th:if="${totalPages != null and totalPages > 0}">
+            <div id="paginationWrapper" th:style="${(totalPages != null and totalPages > 0) ? '' : 'display: none;'}">
                 <nav aria-label="Flight pagination" id="paginationNav">
                     <ul class="pagination justify-content-center mt-4" id="paginationContainer">
                         <!-- Will be rendered by JavaScript or Thymeleaf -->
@@ -114,6 +114,8 @@
         <div th:replace="~{fragments/layout :: scripts}"></div>
 
         <script th:inline="javascript">
+            
+            const contextPath = /*[[@{/}]]*/ '/';
             // Initialize search criteria from Thymeleaf
             let currentSearchCriteria = {
                 origin: /*[[${origin}]]*/ '',
@@ -234,6 +236,7 @@
             }
 
             // Create flight card HTML
+            // Create flight card HTML
             function createFlightCard(flight) {
 
                 // THAY THẾ HÀM CŨ BẰNG HÀM MỚI NÀY
@@ -276,7 +279,14 @@
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
-                                    <h5 class="mb-0 text-primary">${flight.flightNumber}</h5>
+                                    <h5 class="mb-0 text-primary">
+                                        <a href="${contextPath}flights/${flight.id}" 
+                                           class="text-primary" 
+                                           style="text-decoration: none;"
+                                           title="View flight details">
+                                            ${flight.flightNumber}
+                                        </a>
+                                    </h5>
                                     <small class="text-muted">${flight.aircraftModel || 'N/A'}</small>
                                 </div>
                                 <div class="col-md-3">
@@ -303,7 +313,7 @@
                                         <i class="bi bi-check-circle"></i> ${flight.availableSeats} seats
                                     </small>
                                     <div class="mt-2">
-                                        <a href="/booking/${flight.id}?passengers=${currentSearchCriteria.passengers}" 
+                                        <a href="${contextPath}booking/${flight.id}?passengers=${currentSearchCriteria.passengers}" 
                                            class="btn btn-primary btn-sm">
                                             <i class="bi bi-ticket"></i> Book Now
                                         </a>
@@ -321,7 +331,7 @@
                 // (Chuyển 2 dòng này từ dưới lên)
                 document.getElementById('currentPageDisplay').textContent = currentPage + 1;
                 document.getElementById('totalPagesDisplay').textContent = totalPages;
-                
+
                 const container = document.getElementById('paginationContainer');
 
                 // 2. Nếu chỉ 1 trang, xóa nút và thoát
@@ -329,10 +339,10 @@
                     container.innerHTML = '';
                     return;
                 }
-                
+
                 // 3. Nếu nhiều hơn 1 trang, tạo nút
                 let html = '';
-                
+
                 // Previous button
                 const prevDisabled = currentPage === 0 ? 'disabled' : '';
                 html += `
@@ -372,7 +382,7 @@
                         </a>
                     </li>
                 `;
-                
+
                 container.innerHTML = html;
 
                 // (Không còn 2 dòng cập nhật text ở đây nữa)

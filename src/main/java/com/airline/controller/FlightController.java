@@ -32,7 +32,6 @@ public class FlightController {
             @RequestParam(name = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(name = "passengers", defaultValue = "1") int passengers,
             Model model) {
-
         // Load origins và destinations cho dropdown
         model.addAttribute("origins", routeService.getAllOrigins());
         model.addAttribute("destinations", routeService.getAllDestinations());

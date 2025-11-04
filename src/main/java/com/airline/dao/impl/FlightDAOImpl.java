@@ -32,9 +32,23 @@ public class FlightDAOImpl implements FlightDAO {
         }
     }
 
+    /**
+     * Sửa đổi: Dùng JOIN FETCH để lấy chi tiết Route và Aircraft
+     */
     @Override
     public Optional<Flight> findById(Long id) {
-        return Optional.ofNullable(em.find(Flight.class, id));
+        try {
+            Flight flight = em.createQuery(
+                    "SELECT f FROM Flight f "
+                    + "JOIN FETCH f.route "
+                    + "JOIN FETCH f.aircraft "
+                    + "WHERE f.id = :id", Flight.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            return Optional.of(flight);
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Override

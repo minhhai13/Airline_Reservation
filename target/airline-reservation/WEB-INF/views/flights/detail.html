@@ -1,15 +1,152 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Html.html to edit this template
--->
-<html>
-    <head>
-        <title>TODO supply a title</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{fragments/layout :: head('Flight Details - SkyReserve')}"></head>
     <body>
-        <div>TODO write content</div>
+
+        <nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+        <main class.="container mt-5">
+
+            <div th:if="${flight != null}">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <h2 class="mb-0 text-primary">
+                                    <i class="bi bi-airplane-fill"></i>
+                                    <span th:text="${flight.flightNumber}">VN101</span>
+                                </h2>
+                                <p class="lead text-muted">Flight Details</p>
+                            </div>
+                            <a th:href="@{/flights/search}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Search
+                            </a>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-geo-alt-fill"></i> Route Information
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-5">
+                                                <h4 th:text="${flight.route.origin}">Hanoi</h4>
+                                                <p class="text-muted mb-0">Departure</p>
+                                            </div>
+                                            <div class="col-2 text-center">
+                                                <i class="bi bi-arrow-right fs-2 text-primary"></i>
+                                            </div>
+                                            <div class="col-5 text-end">
+                                                <h4 th:text="${flight.route.destination}">Ho Chi Minh City</h4>
+                                                <p class="text-muted mb-0">Arrival</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <p>
+                                            <strong>Distance:</strong>
+                                            <span th:text="${#numbers.formatDecimal(flight.route.distanceKm, 0, 'COMMA', 2, 'POINT')} + ' km'">1166.00 km</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-clock-fill"></i> Schedule & Aircraft
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Departure Time</h6>
+                                                <p th:text="${#temporals.format(flight.departureTime, 'HH:mm, dd/MM/yyyy')}">06:00, 05/11/2025</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Arrival Time</h6>
+                                                <p th:text="${#temporals.format(flight.arrivalTime, 'HH:mm, dd/MM/yyyy')}">08:15, 05/11/2025</p>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h6>Aircraft Model</h6>
+                                                <p th:text="${flight.aircraft.modelName}">Boeing 737</p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h6>Aircraft Capacity</h6>
+                                                <p th:text="${flight.aircraft.capacity} + ' seats'">189 seats</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card sticky-top" style="top: 80px;">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="bi bi-ticket-perforated-fill"></i> Book This Flight
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="text-success mb-3" 
+                                            th:text="${#numbers.formatDecimal(flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                            1,500,000 VND
+                                        </h4>
+                                        <p class="text-muted">Price per passenger</p>
+
+                                        <span class="badge" 
+                                              th:classappend="${flight.availableSeats > 50 ? 'bg-success' : (flight.availableSeats > 20 ? 'bg-warning' : 'bg-danger')}"
+                                              th:text="${flight.availableSeats} + ' seats available'">
+                                            150 seats available
+                                        </span>
+
+                                        <hr>
+
+                                        <form th:action="@{/booking/{id}(id=${flight.id})}" method="get" id="bookForm">
+                                            <div class="mb-3">
+                                                <label for="passengers" class="form-label">
+                                                    <i class="bi bi-people-fill"></i> Passengers
+                                                </label>
+                                                <input type="number" class="form-control" 
+                                                       id="passengers" name="passengers" 
+                                                       value="1" min="1" 
+                                                       th:max="${flight.availableSeats}" required>
+                                            </div>
+
+                                            <div class="d-grid">
+                                                <button type="submit" class="btn btn-primary btn-lg">
+                                                    <i class="bi bi-check-circle"></i> Book Now
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${flight == null}" class="container text-center mt-5">
+                <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+                <h2 class="mt-4">Flight Not Found</h2>
+                <p class="lead">The flight you are looking for does not exist.</p>
+                <a th:href="@{/flights/search}" class="btn btn-primary btn-lg mt-3">
+                    <i class="bi bi-search"></i> Search Other Flights
+                </a>
+            </div>
+
+        </main>
+
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <div th:replace="~{fragments/layout :: scripts}"></div>
+
     </body>
 </html>
