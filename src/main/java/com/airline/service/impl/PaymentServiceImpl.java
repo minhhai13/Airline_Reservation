@@ -22,18 +22,28 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     private BookingDAO bookingDAO;
 
+    // === THÊM @Override ===
     @Override
     public Payment createPayment(Long bookingId, BigDecimal amount, String paymentMethod) {
+        // Phương thức này giờ chỉ là một lối tắt
+        return this.createPayment(bookingId, amount, paymentMethod, null);
+    }
+
+    // === THÊM @Override ===
+    @Override
+    @Transactional
+    public Payment createPayment(Long bookingId, BigDecimal amount, String paymentMethod, String txnRef) {
         Booking booking = bookingDAO.findById(bookingId)
-            .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
         Payment payment = Payment.builder()
-            .booking(booking)
-            .amount(amount)
-            .paymentMethod(paymentMethod)
-            .status(Payment.PaymentStatus.PENDING)
-            .build();
-        
+                .booking(booking)
+                .amount(amount)
+                .paymentMethod(paymentMethod)
+                .status(Payment.PaymentStatus.PENDING)
+                .transactionId(txnRef) // <-- Lưu vnp_TxnRef (Order ID)
+                .build();
+
         return paymentDAO.save(payment);
     }
 
@@ -58,28 +68,27 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Payment processPayment(Long paymentId, String transactionId) {
         Payment payment = paymentDAO.findById(paymentId)
-            .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
         payment.setStatus(Payment.PaymentStatus.SUCCESS);
         payment.setTransactionId(transactionId);
-        
+
         // Confirm booking
         Booking booking = payment.getBooking();
         booking.confirm();
         bookingDAO.save(booking);
-        
+
         return paymentDAO.save(payment);
     }
 
     @Override
     public Payment failPayment(Long paymentId, String reason) {
         Payment payment = paymentDAO.findById(paymentId)
-            .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
-        
+                .orElseThrow(() -> new IllegalArgumentException("Payment not found"));
+
         payment.setStatus(Payment.PaymentStatus.FAILED);
         payment.setTransactionId("FAILED: " + reason);
-        
+
         return paymentDAO.save(payment);
     }
 }
-

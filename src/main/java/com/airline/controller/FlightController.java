@@ -62,7 +62,7 @@ public class FlightController {
     }
 
     @GetMapping("/{id}")
-    public String flightDetail(@PathVariable Long id, Model model) {
+    public String flightDetail(@PathVariable("id") Long id, Model model) {
         flightService.findById(id).ifPresentOrElse(
                 flight -> model.addAttribute("flight", flight),
                 () -> {
