@@ -194,6 +194,49 @@ public class AdminRestController {
         }
     }
 
+    // Thêm vào src/main/java/com/airline/controller/api/AdminRestController.java
+    @PutMapping("/flights/{id}")
+    public ResponseEntity<ApiResponse<FlightResponse>> updateFlight(
+            @PathVariable(name = "id") Long id,
+            @RequestBody FlightRequest request,
+            HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Admin access required"));
+        }
+
+        try {
+            Flight existingFlight = flightService.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Flight not found"));
+
+            Route route = routeService.findById(request.getRouteId())
+                    .orElseThrow(() -> new IllegalArgumentException("Route not found"));
+
+            Aircraft aircraft = aircraftDAO.findById(request.getAircraftId())
+                    .orElseThrow(() -> new IllegalArgumentException("Aircraft not found"));
+
+            // Update flight properties
+            existingFlight.setFlightNumber(request.getFlightNumber());
+            existingFlight.setDepartureTime(request.getDepartureTime());
+            existingFlight.setArrivalTime(request.getArrivalTime());
+            existingFlight.setPrice(request.getPrice());
+            existingFlight.setAvailableSeats(request.getAvailableSeats());
+            existingFlight.setRoute(route);
+            existingFlight.setAircraft(aircraft);
+
+            Flight updatedFlight = flightService.updateFlight(existingFlight);
+            FlightResponse responseDto = convertToFlightResponse(updatedFlight);
+
+            return ResponseEntity.ok()
+                    .body(ApiResponse.success("Flight updated successfully", responseDto));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
     // === HÀM HELPER ĐỂ CHUYỂN ĐỔI SANG DTO ===
     private FlightResponse convertToFlightResponse(Flight flight) {
         RouteInfo routeInfo = RouteInfo.builder()
