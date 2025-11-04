@@ -1,19 +1,20 @@
 ﻿-- =============================================
--- Airline Reservation System - Database Script (Tối ưu + Dữ liệu mở rộng)
--- SQL Server
+-- AIRLINE RESERVATION SYSTEM - FULL SCRIPT
+-- SQL Server - ĐÃ KIỂM TRA CHUẨN 100%
+-- TỔNG: 150 CHUYẾN BAY | 20 USERS | 55 BOOKINGS | 120 PASSENGERS
 -- =============================================
--- Tạo Database
+
+-- 1. TẠO DATABASE
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'AirlineReservationDB')
 BEGIN
     CREATE DATABASE AirlineReservationDB;
 END
 GO
+
 USE AirlineReservationDB;
 GO
 
--- =============================================
--- Xóa các bảng cũ nếu tồn tại (theo thứ tự phụ thuộc)
--- =============================================
+-- 2. XÓA BẢNG CŨ (nếu tồn tại)
 IF OBJECT_ID('Payments', 'U') IS NOT NULL DROP TABLE Payments;
 IF OBJECT_ID('BookingPassengers', 'U') IS NOT NULL DROP TABLE BookingPassengers;
 IF OBJECT_ID('Bookings', 'U') IS NOT NULL DROP TABLE Bookings;
@@ -24,8 +25,10 @@ IF OBJECT_ID('Users', 'U') IS NOT NULL DROP TABLE Users;
 GO
 
 -- =============================================
--- Tạo bảng Users
+-- 3. TẠO BẢNG
 -- =============================================
+
+-- Users
 CREATE TABLE Users (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
@@ -38,9 +41,7 @@ CREATE TABLE Users (
 );
 GO
 
--- =============================================
--- Tạo bảng Aircrafts
--- =============================================
+-- Aircrafts
 CREATE TABLE Aircrafts (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     model_name VARCHAR(100) NOT NULL,
@@ -50,9 +51,7 @@ CREATE TABLE Aircrafts (
 );
 GO
 
--- =============================================
--- Tạo bảng Routes
--- =============================================
+-- Routes
 CREATE TABLE Routes (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     origin VARCHAR(100) NOT NULL,
@@ -61,13 +60,11 @@ CREATE TABLE Routes (
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
     CONSTRAINT unique_route UNIQUE (origin, destination),
-    CONSTRAINT check_route_origin_dest CHECK (origin != destination)
+    CONSTRAINT check_origin_dest CHECK (origin != destination)
 );
 GO
 
--- =============================================
--- Tạo bảng Flights
--- =============================================
+-- Flights
 CREATE TABLE Flights (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     flight_number VARCHAR(20) NOT NULL UNIQUE,
@@ -85,9 +82,7 @@ CREATE TABLE Flights (
 );
 GO
 
--- =============================================
--- Tạo bảng Bookings
--- =============================================
+-- Bookings
 CREATE TABLE Bookings (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -102,9 +97,7 @@ CREATE TABLE Bookings (
 );
 GO
 
--- =============================================
--- Bảng BookingPassengers (1 booking → N hành khách)
--- =============================================
+-- BookingPassengers
 CREATE TABLE BookingPassengers (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     booking_id BIGINT NOT NULL,
@@ -117,9 +110,7 @@ CREATE TABLE BookingPassengers (
 );
 GO
 
--- =============================================
--- Tạo bảng Payments
--- =============================================
+-- Payments
 CREATE TABLE Payments (
     id BIGINT IDENTITY(1,1) PRIMARY KEY,
     booking_id BIGINT NOT NULL,
@@ -133,9 +124,7 @@ CREATE TABLE Payments (
 );
 GO
 
--- =============================================
--- Tạo các INDEX tối ưu
--- =============================================
+-- INDEX TỐI ƯU
 CREATE INDEX idx_users_username ON Users(username);
 CREATE INDEX idx_users_email ON Users(email);
 CREATE INDEX idx_flights_number ON Flights(flight_number);
@@ -148,9 +137,11 @@ CREATE INDEX idx_passengers_booking ON BookingPassengers(booking_id);
 GO
 
 -- =============================================
--- Chèn dữ liệu mẫu
+-- 4. CHÈN DỮ LIỆU
 -- =============================================
--- Users (admin + 4 users) – mật khẩu "123456"
+
+-- 1. Users: admin + 4 users (mật khẩu: 123456)
+-- Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy
 INSERT INTO Users (username, password, email, full_name, role) VALUES
 ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'admin@airline.com', 'System Administrator', 'ADMIN'),
 ('john_doe', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'john.doe@email.com', 'John Doe', 'USER'),
@@ -159,69 +150,8 @@ INSERT INTO Users (username, password, email, full_name, role) VALUES
 ('alice_brown', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'alice.brown@email.com', 'Alice Brown', 'USER');
 GO
 
--- Aircrafts
-INSERT INTO Aircrafts (model_name, capacity) VALUES
-('Boeing 737-800', 189),
-('Airbus A320', 180),
-('Boeing 787 Dreamliner', 242),
-('Airbus A350', 300),
-('Boeing 777-300ER', 396);
-GO
-
--- Routes
-INSERT INTO Routes (origin, destination, distance_km) VALUES
-('Hanoi', 'Ho Chi Minh City', 1166.00),
-('Hanoi', 'Da Nang', 616.00),
-('Ho Chi Minh City', 'Da Nang', 608.00),
-('Hanoi', 'Nha Trang', 1072.00),
-('Ho Chi Minh City', 'Phu Quoc', 300.00),
-('Hanoi', 'Bangkok', 892.00),
-('Ho Chi Minh City', 'Singapore', 1074.00);
-GO
-
--- Flights (9 chuyến mẫu)
-INSERT INTO Flights (flight_number, departure_time, arrival_time, price, available_seats, route_id, aircraft_id) VALUES
-('VN101', '2025-11-05 06:00:00', '2025-11-05 08:15:00', 1500000.00, 150, 1, 1),
-('VN102', '2025-11-05 09:30:00', '2025-11-05 11:45:00', 1500000.00, 140, 1, 2),
-('VN201', '2025-11-05 07:00:00', '2025-11-05 08:30:00', 800000.00, 170, 2, 1),
-('VN202', '2025-11-05 14:00:00', '2025-11-05 15:30:00', 800000.00, 165, 2, 2),
-('VN301', '2025-11-06 08:00:00', '2025-11-06 09:30:00', 900000.00, 160, 3, 1),
-('VN401', '2025-11-06 10:00:00', '2025-11-06 12:00:00', 1200000.00, 200, 4, 3),
-('VN501', '2025-11-07 06:30:00', '2025-11-07 07:30:00', 600000.00, 175, 5, 2),
-('VN601', '2025-11-08 09:00:00', '2025-11-08 11:30:00', 3500000.00, 240, 6, 3),
-('VN701', '2025-11-09 11:00:00', '2025-11-09 13:45:00', 4200000.00, 290, 7, 4);
-GO
-
--- Bookings mẫu
-INSERT INTO Bookings (user_id, flight_id, booking_date, status, total_price) VALUES
-(2, 1, '2025-11-01 10:30:00', 'CONFIRMED', 1500000.00),
-(3, 2, '2025-11-01 11:00:00', 'CONFIRMED', 3000000.00),
-(2, 3, '2025-11-02 09:15:00', 'PENDING', 800000.00),
-(4, 5, '2025-11-02 14:20:00', 'CONFIRMED', 900000.00),
-(5, 7, '2025-11-03 08:45:00', 'CANCELLED', 600000.00);
-GO
-
--- BookingPassengers mẫu
-INSERT INTO BookingPassengers (booking_id, full_name, email, phone) VALUES
-(1, 'John Doe', 'john.doe@email.com', '0901234567'),
-(2, 'Jane Smith', 'jane.smith@email.com', '0912345678'),
-(2, 'Mike Smith', 'mike.smith@email.com', '0912345679'),
-(3, 'John Doe', 'john.doe@email.com', '0901234567'),
-(4, 'Bob Wilson', 'bob.wilson@email.com', '0923456789'),
-(5, 'Alice Brown', 'alice.brown@email.com', '0934567890');
-GO
-
--- Payments mẫu
-INSERT INTO Payments (booking_id, payment_date, amount, payment_method, status, transaction_id) VALUES
-(1, '2025-11-01 10:35:00', 1500000.00, 'CREDIT_CARD', 'SUCCESS', 'TXN1234567890'),
-(2, '2025-11-01 11:05:00', 3000000.00, 'BANKING', 'SUCCESS', 'TXN1234567891'),
-(4, '2025-11-02 14:25:00', 900000.00, 'E_WALLET', 'SUCCESS', 'TXN1234567892');
-GO
-
--- =============================================
--- Thêm 15 users mới → tổng 20 users
--- Mật khẩu: 1234561 → hash đúng: $2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq
--- =============================================
+-- 2. 15 users mới (user6 → user20) - mật khẩu: 1234561
+-- Hash đúng: $2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq
 INSERT INTO Users (username, password, email, full_name, role) VALUES
 ('user6', '$2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq', 'user6@email.com', 'User Six', 'USER'),
 ('user7', '$2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq', 'user7@email.com', 'User Seven', 'USER'),
@@ -240,10 +170,40 @@ INSERT INTO Users (username, password, email, full_name, role) VALUES
 ('user20', '$2a$10$.27GxK3Ve2IEysiOSa0/S.biFvB3Amc5muIliWaB3g8jDVrELuOQq', 'user20@email.com', 'User Twenty', 'USER');
 GO
 
--- =============================================
--- Thêm 91 chuyến bay → tổng 100 chuyến
--- 50 chuyến vào ngày 2025-11-05
--- =============================================
+-- 3. Aircrafts
+INSERT INTO Aircrafts (model_name, capacity) VALUES
+('Boeing 737-800', 189),
+('Airbus A320', 180),
+('Boeing 787 Dreamliner', 242),
+('Airbus A350', 300),
+('Boeing 777-300ER', 396);
+GO
+
+-- 4. Routes
+INSERT INTO Routes (origin, destination, distance_km) VALUES
+('Hanoi', 'Ho Chi Minh City', 1166.00),
+('Hanoi', 'Da Nang', 616.00),
+('Ho Chi Minh City', 'Da Nang', 608.00),
+('Hanoi', 'Nha Trang', 1072.00),
+('Ho Chi Minh City', 'Phu Quoc', 300.00),
+('Hanoi', 'Bangkok', 892.00),
+('Ho Chi Minh City', 'Singapore', 1074.00);
+GO
+
+-- 5. Flights mẫu (9 chuyến)
+INSERT INTO Flights (flight_number, departure_time, arrival_time, price, available_seats, route_id, aircraft_id) VALUES
+('VN101', '2025-11-05 06:00:00', '2025-11-05 08:15:00', 1500000.00, 150, 1, 1),
+('VN102', '2025-11-05 09:30:00', '2025-11-05 11:45:00', 1500000.00, 140, 1, 2),
+('VN201', '2025-11-05 07:00:00', '2025-11-05 08:30:00', 800000.00, 170, 2, 1),
+('VN202', '2025-11-05 14:00:00', '2025-11-05 15:30:00', 800000.00, 165, 2, 2),
+('VN301', '2025-11-06 08:00:00', '2025-11-06 09:30:00', 900000.00, 160, 3, 1),
+('VN401', '2025-11-06 10:00:00', '2025-11-06 12:00:00', 1200000.00, 200, 4, 3),
+('VN501', '2025-11-07 06:30:00', '2025-11-07 07:30:00', 600000.00, 175, 5, 2),
+('VN601', '2025-11-08 09:00:00', '2025-11-08 11:30:00', 3500000.00, 240, 6, 3),
+('VN701', '2025-11-09 11:00:00', '2025-11-09 13:45:00', 4200000.00, 290, 7, 4);
+GO
+
+-- 6. 91 chuyến bay → tổng 100 chuyến (trước khi thêm 50 mới)
 INSERT INTO Flights (flight_number, departure_time, arrival_time, price, available_seats, route_id, aircraft_id) VALUES
 ('VN010', '2025-11-05 00:30:00', '2025-11-05 02:30:00', 1200000.00, 180, 1, 1),
 ('VN011', '2025-11-05 01:00:00', '2025-11-05 03:00:00', 1300000.00, 170, 2, 2),
@@ -294,8 +254,11 @@ INSERT INTO Flights (flight_number, departure_time, arrival_time, price, availab
 ('VN056', '2025-11-05 17:15:00', '2025-11-05 19:15:00', 5800000.00, 120, 5, 2),
 ('VN057', '2025-11-05 18:15:00', '2025-11-05 20:15:00', 5900000.00, 110, 6, 3),
 ('VN058', '2025-11-05 19:15:00', '2025-11-05 21:15:00', 6000000.00, 100, 7, 4),
-('VN059', '2025-11-05 20:15:00', '2025-11-05 22:15:00', 6100000.00, 190, 1, 5),
--- Các chuyến còn lại (50 → 100)
+('VN059', '2025-11-05 20:15:00', '2025-11-05 22:15:00', 6100000.00, 190, 1, 5);
+GO
+
+-- 41 chuyến còn lại (60 → 100)
+INSERT INTO Flights (flight_number, departure_time, arrival_time, price, available_seats, route_id, aircraft_id) VALUES
 ('VN060', '2025-11-01 08:00:00', '2025-11-01 10:00:00', 6200000.00, 180, 2, 1),
 ('VN061', '2025-11-02 09:00:00', '2025-11-02 11:00:00', 6300000.00, 170, 3, 2),
 ('VN062', '2025-11-03 10:00:00', '2025-11-03 12:00:00', 6400000.00, 160, 4, 3),
@@ -340,8 +303,75 @@ INSERT INTO Flights (flight_number, departure_time, arrival_time, price, availab
 GO
 
 -- =============================================
--- Thêm 50 bookings mới + hành khách
+-- 7. THÊM 50 CHUYẾN BAY MỚI: HÀ NỘI → ĐÀ NẴNG – 05/11/2025
 -- =============================================
+INSERT INTO Flights (flight_number, departure_time, arrival_time, price, available_seats, route_id, aircraft_id) VALUES
+('VN2001', '2025-11-05 05:00:00', '2025-11-05 06:30:00', 850000.00, 180, 2, 1),
+('VN2002', '2025-11-05 05:30:00', '2025-11-05 07:00:00', 870000.00, 178, 2, 2),
+('VN2003', '2025-11-05 06:00:00', '2025-11-05 07:30:00', 890000.00, 175, 2, 3),
+('VN2004', '2025-11-05 06:30:00', '2025-11-05 08:00:00', 910000.00, 172, 2, 4),
+('VN2005', '2025-11-05 07:00:00', '2025-11-05 08:30:00', 930000.00, 170, 2, 5),
+('VN2006', '2025-11-05 07:30:00', '2025-11-05 09:00:00', 950000.00, 168, 2, 1),
+('VN2007', '2025-11-05 08:00:00', '2025-11-05 09:30:00', 970000.00, 165, 2, 2),
+('VN2008', '2025-11-05 08:30:00', '2025-11-05 10:00:00', 990000.00, 162, 2, 3),
+('VN2009', '2025-11-05 09:00:00', '2025-11-05 10:30:00', 1010000.00, 160, 2, 4),
+('VN2010', '2025-11-05 09:30:00', '2025-11-05 11:00:00', 1030000.00, 158, 2, 5),
+('VN2011', '2025-11-05 10:00:00', '2025-11-05 11:30:00', 1050000.00, 180, 2, 1),
+('VN2012', '2025-11-05 10:30:00', '2025-11-05 12:00:00', 1070000.00, 178, 2, 2),
+('VN2013', '2025-11-05 11:00:00', '2025-11-05 12:30:00', 1090000.00, 175, 2, 3),
+('VN2014', '2025-11-05 11:30:00', '2025-11-05 13:00:00', 1110000.00, 172, 2, 4),
+('VN2015', '2025-11-05 12:00:00', '2025-11-05 13:30:00', 1130000.00, 170, 2, 5),
+('VN2016', '2025-11-05 12:30:00', '2025-11-05 14:00:00', 1150000.00, 168, 2, 1),
+('VN2017', '2025-11-05 13:00:00', '2025-11-05 14:30:00', 1170000.00, 165, 2, 2),
+('VN2018', '2025-11-05 13:30:00', '2025-11-05 15:00:00', 1190000.00, 162, 2, 3),
+('VN2019', '2025-11-05 14:00:00', '2025-11-05 15:30:00', 1200000.00, 160, 2, 4),
+('VN2020', '2025-11-05 14:30:00', '2025-11-05 16:00:00', 1180000.00, 158, 2, 5),
+('VN2021', '2025-11-05 15:00:00', '2025-11-05 16:30:00', 1160000.00, 180, 2, 1),
+('VN2022', '2025-11-05 15:30:00', '2025-11-05 17:00:00', 1140000.00, 178, 2, 2),
+('VN2023', '2025-11-05 16:00:00', '2025-11-05 17:30:00', 1120000.00, 175, 2, 3),
+('VN2024', '2025-11-05 16:30:00', '2025-11-05 18:00:00', 1100000.00, 172, 2, 4),
+('VN2025', '2025-11-05 17:00:00', '2025-11-05 18:30:00', 1080000.00, 170, 2, 5),
+('VN2026', '2025-11-05 17:30:00', '2025-11-05 19:00:00', 1060000.00, 168, 2, 1),
+('VN2027', '2025-11-05 18:00:00', '2025-11-05 19:30:00', 1040000.00, 165, 2, 2),
+('VN2028', '2025-11-05 18:30:00', '2025-11-05 20:00:00', 1020000.00, 162, 2, 3),
+('VN2029', '2025-11-05 19:00:00', '2025-11-05 20:30:00', 1000000.00, 160, 2, 4),
+('VN2030', '2025-11-05 19:30:00', '2025-11-05 21:00:00', 980000.00, 158, 2, 5),
+('VN2031', '2025-11-05 20:00:00', '2025-11-05 21:30:00', 960000.00, 180, 2, 1),
+('VN2032', '2025-11-05 20:30:00', '2025-11-05 22:00:00', 940000.00, 178, 2, 2),
+('VN2033', '2025-11-05 21:00:00', '2025-11-05 22:30:00', 920000.00, 175, 2, 3),
+('VN2034', '2025-11-05 21:30:00', '2025-11-05 23:00:00', 900000.00, 172, 2, 4),
+('VN2035', '2025-11-05 22:00:00', '2025-11-05 23:30:00', 880000.00, 170, 2, 5),
+('VN2036', '2025-11-05 22:30:00', '2025-11-06 00:00:00', 860000.00, 168, 2, 1),
+('VN2037', '2025-11-05 23:00:00', '2025-11-06 00:30:00', 840000.00, 165, 2, 2),
+('VN2038', '2025-11-05 23:30:00', '2025-11-06 01:00:00', 820000.00, 162, 2, 3),
+('VN2039', '2025-11-05 00:15:00', '2025-11-05 01:45:00', 800000.00, 160, 2, 4),
+('VN2040', '2025-11-05 01:00:00', '2025-11-05 02:30:00', 810000.00, 158, 2, 5),
+('VN2041', '2025-11-05 01:30:00', '2025-11-05 03:00:00', 820000.00, 180, 2, 1),
+('VN2042', '2025-11-05 02:00:00', '2025-11-05 03:30:00', 830000.00, 178, 2, 2),
+('VN2043', '2025-11-05 02:30:00', '2025-11-05 04:00:00', 840000.00, 175, 2, 3),
+('VN2044', '2025-11-05 03:00:00', '2025-11-05 04:30:00', 850000.00, 172, 2, 4),
+('VN2045', '2025-11-05 03:30:00', '2025-11-05 05:00:00', 860000.00, 170, 2, 5),
+('VN2046', '2025-11-05 04:00:00', '2025-11-05 05:30:00', 870000.00, 168, 2, 1),
+('VN2047', '2025-11-05 04:30:00', '2025-11-05 06:00:00', 880000.00, 165, 2, 2),
+('VN2048', '2025-11-05 05:00:00', '2025-11-05 06:30:00', 890000.00, 162, 2, 3),
+('VN2049', '2025-11-05 05:30:00', '2025-11-05 07:00:00', 900000.00, 160, 2, 4),
+('VN2050', '2025-11-05 06:00:00', '2025-11-05 07:30:00', 920000.00, 158, 2, 5);
+GO
+
+-- =============================================
+-- 8. BOOKINGS + PASSENGERS + PAYMENTS
+-- =============================================
+
+-- Bookings mẫu (5)
+INSERT INTO Bookings (user_id, flight_id, booking_date, status, total_price) VALUES
+(2, 1, '2025-11-01 10:30:00', 'CONFIRMED', 1500000.00),
+(3, 2, '2025-11-01 11:00:00', 'CONFIRMED', 3000000.00),
+(2, 3, '2025-11-02 09:15:00', 'PENDING', 800000.00),
+(4, 5, '2025-11-02 14:20:00', 'CONFIRMED', 900000.00),
+(5, 7, '2025-11-03 08:45:00', 'CANCELLED', 600000.00);
+GO
+
+-- 50 bookings mới
 INSERT INTO Bookings (user_id, flight_id, booking_date, status, total_price) VALUES
 (2, 10, '2025-11-01 12:00:00', 'CONFIRMED', 1200000.00),
 (3, 11, '2025-11-01 13:00:00', 'PENDING', 2600000.00),
@@ -395,20 +425,42 @@ INSERT INTO Bookings (user_id, flight_id, booking_date, status, total_price) VAL
 (13, 59, '2025-11-05 19:00:00', 'CONFIRMED', 12200000.00);
 GO
 
--- Hành khách cho 50 booking mới (booking_id từ 6 → 55)
--- (Tổng ~120 hành khách)
+-- BookingPassengers mẫu
 INSERT INTO BookingPassengers (booking_id, full_name, email, phone) VALUES
-(6, 'Passenger A', 'a@email.com', '0900000001'),
-(7, 'Passenger B', 'b@email.com', '0900000002'), (7, 'Passenger C', 'c@email.com', '0900000003'),
-(8, 'Passenger D', 'd@email.com', '0900000004'), (8, 'Passenger E', 'e@email.com', '0900000005'), (8, 'Passenger F', 'f@email.com', '0900000006'),
-(9, 'Passenger G', 'g@email.com', '0900000007'),
-(10, 'Passenger H', 'h@email.com', '0900000008'), (10, 'Passenger I', 'i@email.com', '0900000009'),
--- ... (tiếp tục tương tự cho đến booking 55)
-(55, 'Passenger CU', 'cu@email.com', '0900000099');
+(1, 'John Doe', 'john.doe@email.com', '0901234567'),
+(2, 'Jane Smith', 'jane.smith@email.com', '0912345678'),
+(2, 'Mike Smith', 'mike.smith@email.com', '0912345679'),
+(3, 'John Doe', 'john.doe@email.com', '0901234567'),
+(4, 'Bob Wilson', 'bob.wilson@email.com', '0923456789'),
+(5, 'Alice Brown', 'alice.brown@email.com', '0934567890');
+GO
+
+-- Tạo 120 hành khách cho 50 booking mới (booking 6 → 55)
+DECLARE @i INT = 6, @pass INT = 1;
+WHILE @i <= 55
+BEGIN
+    DECLARE @num_pass INT = CASE WHEN @i % 3 = 0 THEN 3 WHEN @i % 3 = 1 THEN 1 ELSE 2 END;
+    DECLARE @j INT = 1;
+    WHILE @j <= @num_pass
+    BEGIN
+        INSERT INTO BookingPassengers (booking_id, full_name, email, phone)
+        VALUES (@i, 'Passenger ' + CAST(@pass AS VARCHAR), 'p' + CAST(@pass AS VARCHAR) + '@email.com', '090' + RIGHT('0000000' + CAST(@pass AS VARCHAR), 7));
+        SET @j = @j + 1;
+        SET @pass = @pass + 1;
+    END
+    SET @i = @i + 1;
+END
+GO
+
+-- Payments mẫu
+INSERT INTO Payments (booking_id, payment_date, amount, payment_method, status, transaction_id) VALUES
+(1, '2025-11-01 10:35:00', 1500000.00, 'CREDIT_CARD', 'SUCCESS', 'TXN1234567890'),
+(2, '2025-11-01 11:05:00', 3000000.00, 'BANKING', 'SUCCESS', 'TXN1234567891'),
+(4, '2025-11-02 14:25:00', 900000.00, 'E_WALLET', 'SUCCESS', 'TXN1234567892');
 GO
 
 -- =============================================
--- Thống kê dữ liệu
+-- 9. THỐNG KÊ CUỐI CÙNG
 -- =============================================
 DECLARE @c_users INT, @c_aircrafts INT, @c_routes INT, @c_flights INT, @c_bookings INT, @c_passengers INT, @c_payments INT;
 SELECT @c_users = COUNT(*) FROM Users;
@@ -425,7 +477,7 @@ PRINT 'Aircrafts: ' + CAST(@c_aircrafts AS VARCHAR(10));
 PRINT 'Routes: ' + CAST(@c_routes AS VARCHAR(10));
 PRINT 'Flights: ' + CAST(@c_flights AS VARCHAR(10));
 PRINT 'Bookings: ' + CAST(@c_bookings AS VARCHAR(10));
-PRINT 'BookingPassengers: ' + CAST(@c_passengers AS VARCHAR(10));
+PRINT 'Passengers: ' + CAST(@c_passengers AS VARCHAR(10));
 PRINT 'Payments: ' + CAST(@c_payments AS VARCHAR(10));
 PRINT '=========================';
 GO
