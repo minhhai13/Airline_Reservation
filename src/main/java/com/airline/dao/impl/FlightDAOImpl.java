@@ -66,8 +66,12 @@ public class FlightDAOImpl implements FlightDAO {
 
     @Override
     public List<Flight> findAll() {
+        // Thêm JOIN FETCH f.route và JOIN FETCH f.aircraft
         return em.createQuery(
-                "SELECT f FROM Flight f ORDER BY f.departureTime", Flight.class)
+                "SELECT f FROM Flight f "
+                + "JOIN FETCH f.route "
+                + "JOIN FETCH f.aircraft "
+                + "ORDER BY f.departureTime", Flight.class)
                 .getResultList();
     }
 

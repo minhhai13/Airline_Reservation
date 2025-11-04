@@ -31,6 +31,7 @@ D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\ApiResponse.jav
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\BookingRequest.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\BookingResponse.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\DashboardStats.java
+D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\FlightRequest.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\FlightResponse.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\FlightSearchRequest.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\dto\LoginRequest.java

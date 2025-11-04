@@ -16,6 +16,7 @@ com\airline\dto\ApiResponse.class
 com\airline\controller\api\BookingRestController.class
 com\airline\service\impl\UserServiceImpl.class
 com\airline\service\impl\FlightServiceImpl.class
+com\airline\dto\FlightRequest.class
 com\airline\dto\PageResponse.class
 com\airline\dto\BookingResponse$BookingResponseBuilder.class
 com\airline\service\RecommendationService.class

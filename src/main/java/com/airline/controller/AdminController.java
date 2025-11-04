@@ -1,10 +1,13 @@
 package com.airline.controller;
 
 import com.airline.dto.DashboardStats;
+import com.airline.entity.Aircraft;
 import com.airline.entity.Booking;
 import com.airline.entity.Flight;
+import com.airline.entity.Route;
 import com.airline.entity.User;
 import com.airline.service.*;
+import com.airline.dao.AircraftDAO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +28,12 @@ public class AdminController {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private RouteService routeService; // <-- Đã thêm
+
+    @Autowired
+    private AircraftDAO aircraftDAO; // <-- Đã thêm
 
     // Check admin role
     private boolean isAdmin(HttpSession session) {
@@ -82,7 +91,13 @@ public class AdminController {
         }
 
         List<Flight> flights = flightService.findAll();
+        List<Route> routes = routeService.findAll(); // <-- Đã thêm
+        List<Aircraft> aircrafts = aircraftDAO.findAll(); // <-- Đã thêm
+
         model.addAttribute("flights", flights);
+        model.addAttribute("routes", routes); // <-- Đã thêm
+        model.addAttribute("aircrafts", aircrafts); // <-- Đã thêm
+
         return "admin/flights";
     }
 

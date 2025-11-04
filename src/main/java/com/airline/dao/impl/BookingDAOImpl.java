@@ -53,6 +53,9 @@ public class BookingDAOImpl implements BookingDAO {
         return em.createQuery(
                 "SELECT DISTINCT b FROM Booking b "
                 + "LEFT JOIN FETCH b.passengers "
+                + "JOIN FETCH b.user " // <-- Thêm dòng này
+                + "JOIN FETCH b.flight f " // <-- Thêm dòng này
+                + "JOIN FETCH f.route " // <-- Thêm dòng này (vì trang booking cũng hiển thị route)
                 + "ORDER BY b.bookingDate DESC", Booking.class)
                 .getResultList();
     }

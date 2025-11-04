@@ -1,10 +1,13 @@
 package com.airline.controller.api;
 
 import com.airline.dto.*;
+import com.airline.entity.Aircraft;
 import com.airline.entity.Booking;
 import com.airline.entity.Flight;
+import com.airline.entity.Route;
 import com.airline.entity.User;
 import com.airline.service.*;
+import com.airline.dao.AircraftDAO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,12 @@ public class AdminRestController {
     @Autowired
     private BookingService bookingService;
 
+    @Autowired
+    private RouteService routeService; // <-- Đã thêm
+
+    @Autowired
+    private AircraftDAO aircraftDAO; // <-- Đã thêm
+
     // Check admin authorization
     private boolean isAdmin(HttpSession session) {
         User user = (User) session.getAttribute("user");
@@ -38,7 +47,7 @@ public class AdminRestController {
     public ResponseEntity<ApiResponse<DashboardStats>> getDashboardStats(HttpSession session) {
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Admin access required"));
+                    .body(ApiResponse.error("Admin access required"));
         }
 
         List<User> users = userService.findAllUsers();
@@ -50,19 +59,19 @@ public class AdminRestController {
         long cancelled = bookings.stream().filter(Booking::isCancelled).count();
 
         BigDecimal revenue = bookings.stream()
-            .filter(Booking::isConfirmed)
-            .map(Booking::getTotalPrice)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .filter(Booking::isConfirmed)
+                .map(Booking::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         DashboardStats stats = DashboardStats.builder()
-            .totalUsers((long) users.size())
-            .totalFlights((long) flights.size())
-            .totalBookings((long) bookings.size())
-            .pendingBookings(pending)
-            .confirmedBookings(confirmed)
-            .cancelledBookings(cancelled)
-            .totalRevenue(revenue)
-            .build();
+                .totalUsers((long) users.size())
+                .totalFlights((long) flights.size())
+                .totalBookings((long) bookings.size())
+                .pendingBookings(pending)
+                .confirmedBookings(confirmed)
+                .cancelledBookings(cancelled)
+                .totalRevenue(revenue)
+                .build();
 
         return ResponseEntity.ok(ApiResponse.success(stats));
     }
@@ -72,18 +81,18 @@ public class AdminRestController {
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(HttpSession session) {
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Admin access required"));
+                    .body(ApiResponse.error("Admin access required"));
         }
 
         List<UserResponse> users = userService.findAllUsers().stream()
-            .map(u -> UserResponse.builder()
+                .map(u -> UserResponse.builder()
                 .id(u.getId())
                 .username(u.getUsername())
                 .email(u.getEmail())
                 .fullName(u.getFullName())
                 .role(u.getRole().name())
                 .build())
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(ApiResponse.success(users));
     }
@@ -93,20 +102,12 @@ public class AdminRestController {
     public ResponseEntity<ApiResponse<List<FlightResponse>>> getAllFlights(HttpSession session) {
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Admin access required"));
+                    .body(ApiResponse.error("Admin access required"));
         }
 
         List<FlightResponse> flights = flightService.findAll().stream()
-            .map(f -> FlightResponse.builder()
-                .id(f.getId())
-                .flightNumber(f.getFlightNumber())
-                .departureTime(f.getDepartureTime())
-                .arrivalTime(f.getArrivalTime())
-                .price(f.getPrice())
-                .availableSeats(f.getAvailableSeats())
-                .aircraftModel(f.getAircraft().getModelName())
-                .build())
-            .collect(Collectors.toList());
+                .map(this::convertToFlightResponse) // Sửa để dùng DTO
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(ApiResponse.success(flights));
     }
@@ -116,10 +117,10 @@ public class AdminRestController {
     public ResponseEntity<ApiResponse<Void>> deleteFlight(
             @PathVariable(name = "id") Long id,
             HttpSession session) {
-        
+
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Admin access required"));
+                    .body(ApiResponse.error("Admin access required"));
         }
 
         try {
@@ -127,7 +128,7 @@ public class AdminRestController {
             return ResponseEntity.ok(ApiResponse.success("Flight deleted", null));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponse.error(e.getMessage()));
         }
     }
 
@@ -136,10 +137,10 @@ public class AdminRestController {
     public ResponseEntity<ApiResponse<Void>> cancelBooking(
             @PathVariable(name = "id") Long id,
             HttpSession session) {
-        
+
         if (!isAdmin(session)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(ApiResponse.error("Admin access required"));
+                    .body(ApiResponse.error("Admin access required"));
         }
 
         try {
@@ -147,8 +148,70 @@ public class AdminRestController {
             return ResponseEntity.ok(ApiResponse.success("Booking cancelled", null));
         } catch (Exception e) {
             return ResponseEntity.badRequest()
-                .body(ApiResponse.error(e.getMessage()));
+                    .body(ApiResponse.error(e.getMessage()));
         }
     }
-}
 
+    // === API ĐỂ TẠO FLIGHT (ĐÃ SỬA LỖI JSON LOOP) ===
+    @PostMapping("/flights")
+    public ResponseEntity<ApiResponse<FlightResponse>> createFlight( // Trả về FlightResponse
+            @RequestBody FlightRequest request,
+            HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Admin access required"));
+        }
+
+        try {
+            Route route = routeService.findById(request.getRouteId())
+                    .orElseThrow(() -> new IllegalArgumentException("Route not found"));
+
+            Aircraft aircraft = aircraftDAO.findById(request.getAircraftId())
+                    .orElseThrow(() -> new IllegalArgumentException("Aircraft not found"));
+
+            Flight flight = Flight.builder()
+                    .flightNumber(request.getFlightNumber())
+                    .departureTime(request.getDepartureTime())
+                    .arrivalTime(request.getArrivalTime())
+                    .price(request.getPrice())
+                    .availableSeats(request.getAvailableSeats())
+                    .route(route)
+                    .aircraft(aircraft)
+                    .build();
+
+            Flight savedFlight = flightService.createFlight(flight);
+
+            // Chuyển đổi Entity sang DTO trước khi trả về
+            FlightResponse responseDto = convertToFlightResponse(savedFlight);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success("Flight created successfully", responseDto));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    // === HÀM HELPER ĐỂ CHUYỂN ĐỔI SANG DTO ===
+    private FlightResponse convertToFlightResponse(Flight flight) {
+        RouteInfo routeInfo = RouteInfo.builder()
+                .id(flight.getRoute().getId())
+                .origin(flight.getRoute().getOrigin())
+                .destination(flight.getRoute().getDestination())
+                .distanceKm(flight.getRoute().getDistanceKm())
+                .build();
+
+        return FlightResponse.builder()
+                .id(flight.getId())
+                .flightNumber(flight.getFlightNumber())
+                .departureTime(flight.getDepartureTime())
+                .arrivalTime(flight.getArrivalTime())
+                .price(flight.getPrice())
+                .availableSeats(flight.getAvailableSeats())
+                .route(routeInfo)
+                .aircraftModel(flight.getAircraft().getModelName())
+                .build();
+    }
+}
