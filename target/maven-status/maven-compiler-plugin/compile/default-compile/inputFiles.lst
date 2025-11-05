@@ -2,7 +2,6 @@ D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\config\AppConfig.ja
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\config\VNPayConfig.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\AdminController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\AdminRestController.java
-D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\AuthRestController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\BookingRestController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\FlightRestController.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\controller\api\PaymentRestController.java
@@ -44,6 +43,7 @@ D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\entity\Flight.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\entity\Payment.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\entity\Route.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\entity\User.java
+D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\exception\GlobalExceptionHandler.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\service\BookingService.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\service\FlightService.java
 D:\FA25\PRJ301\AirLine_Reservation\src\main\java\com\airline\service\impl\BookingServiceImpl.java

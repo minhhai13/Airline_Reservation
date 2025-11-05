@@ -19,7 +19,6 @@ com\airline\dto\FlightRequest.class
 com\airline\dto\BookingResponse$BookingResponseBuilder.class
 com\airline\service\RecommendationService.class
 com\airline\entity\Aircraft.class
-com\airline\controller\api\AuthRestController.class
 com\airline\dto\LoginRequest.class
 com\airline\dao\impl\PaymentDAOImpl.class
 com\airline\dao\UserDAO.class
@@ -72,4 +71,5 @@ com\airline\config\VNPayConfig.class
 com\airline\entity\User$UserBuilder.class
 com\airline\entity\Flight.class
 com\airline\dao\impl\UserDAOImpl.class
+com\airline\exception\GlobalExceptionHandler.class
 com\airline\config\AppConfig.class

@@ -25,6 +25,12 @@
         <context:include-filter type="annotation" 
                                 expression="org.springframework.web.bind.annotation.RestController"/>
     </context:component-scan>
+    
+    <context:component-scan base-package="com.airline.exception"
+                            use-default-filters="false">
+        <context:include-filter type="annotation"
+                                expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+    </context:component-scan>
     <bean id="templateResolver" 
           class="org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver">
         <property name="prefix" value="/WEB-INF/views/" />

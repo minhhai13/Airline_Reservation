@@ -42,61 +42,6 @@ public class AdminRestController {
         return user != null && user.isAdmin();
     }
 
-    // Dashboard Stats
-    @GetMapping("/reports/summary")
-    public ResponseEntity<ApiResponse<DashboardStats>> getDashboardStats(HttpSession session) {
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Admin access required"));
-        }
-
-        List<User> users = userService.findAllUsers();
-        List<Flight> flights = flightService.findAll();
-        List<Booking> bookings = bookingService.findAll();
-
-        long pending = bookings.stream().filter(Booking::isPending).count();
-        long confirmed = bookings.stream().filter(Booking::isConfirmed).count();
-        long cancelled = bookings.stream().filter(Booking::isCancelled).count();
-
-        BigDecimal revenue = bookings.stream()
-                .filter(Booking::isConfirmed)
-                .map(Booking::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        DashboardStats stats = DashboardStats.builder()
-                .totalUsers((long) users.size())
-                .totalFlights((long) flights.size())
-                .totalBookings((long) bookings.size())
-                .pendingBookings(pending)
-                .confirmedBookings(confirmed)
-                .cancelledBookings(cancelled)
-                .totalRevenue(revenue)
-                .build();
-
-        return ResponseEntity.ok(ApiResponse.success(stats));
-    }
-
-    // Get all users
-    @GetMapping("/users")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(HttpSession session) {
-        if (!isAdmin(session)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Admin access required"));
-        }
-
-        List<UserResponse> users = userService.findAllUsers().stream()
-                .map(u -> UserResponse.builder()
-                .id(u.getId())
-                .username(u.getUsername())
-                .email(u.getEmail())
-                .fullName(u.getFullName())
-                .role(u.getRole().name())
-                .build())
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(ApiResponse.success(users));
-    }
-
     // Get all flights (admin)
     @GetMapping("/flights")
     public ResponseEntity<ApiResponse<List<FlightResponse>>> getAllFlights(HttpSession session) {
