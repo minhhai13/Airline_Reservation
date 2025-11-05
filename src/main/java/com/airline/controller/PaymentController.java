@@ -80,7 +80,7 @@ public class PaymentController {
             if ("00".equals(vnp_ResponseCode)) {
                 // Payment success
                 // Cập nhật trạng thái booking (và có thể cả payment nếu cần)
-                bookingService.confirmBooking(bookingId);
+//                bookingService.confirmBooking(bookingId);
 
                 // (Tùy chọn: tìm payment bằng vnp_TxnRef và cập nhật)
                 paymentService.findByTransactionId(vnp_TxnRef).ifPresent(payment -> {
