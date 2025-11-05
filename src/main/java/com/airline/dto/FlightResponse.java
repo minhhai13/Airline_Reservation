@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class FlightResponse {
+
     private Long id;
     private String flightNumber;
     private LocalDateTime departureTime;
@@ -17,6 +18,6 @@ public class FlightResponse {
     private BigDecimal price;
     private Integer availableSeats;
     private RouteInfo route;
-    private String aircraftModel;
+    private String aircraftModel;// ... các thuộc tính khác
+    private Long aircraftId; // <-- THÊM DÒNG NÀY
 }
-

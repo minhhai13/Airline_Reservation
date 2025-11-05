@@ -83,7 +83,7 @@
                                 <i class="bi bi-credit-card"></i> Pay with VNPAY
                             </button>
 
-                            <a th:href="@{/flights/{id}(id=${flight.id})}" class="btn btn-outline-secondary w-100">
+                            <a th:href="@{/booking/cancel-payment}" class="btn btn-outline-secondary w-100">
                                 <i class="bi bi-arrow-left"></i> Cancel
                             </a>
                         </div>
@@ -103,8 +103,7 @@
                 const bookingRequest = /*[[${bookingRequest}]]*/ {};
 
                 try {
-                    // === BƯỚC 2: Thêm contextPath vào fetch ===
-                    // Step 1: Create booking
+                    // Step 1: Create booking (Giữ nguyên)
                     const bookingResponse = await fetch(contextPath + 'api/bookings/create', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
@@ -120,25 +119,26 @@
 
                     const bookingId = bookingResult.data.id;
 
-                    // === BƯỚC 2: Thêm contextPath vào fetch ===
-                    // Step 2: Create payment
-                    const paymentResponse = await fetch(contextPath + 'api/payment/create', {
+                    // Step 2: Gọi API giả lập thanh toán
+                    // (Chúng ta sẽ tạo API này ở Bước 2)
+                    const paymentResponse = await fetch(contextPath + 'api/payment/simulate/success', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({
                             bookingId: bookingId,
                             amount: bookingResult.data.totalPrice,
-                            paymentMethod: 'VNPAY'
+                            paymentMethod: 'SIMULATED' // Tên giả lập
                         })
                     });
 
                     const paymentResult = await paymentResponse.json();
 
                     if (paymentResult.success) {
-                        // Redirect to VNPAY
-                        window.location.href = paymentResult.data.paymentUrl;
+                        // Nếu giả lập thành công, chuyển thẳng đến trang success
+                        // (Chúng ta sẽ tạo trang /payment/result/simulate ở Bước 3)
+                        window.location.href = contextPath + `payment/result/simulate?bookingId=${bookingId}`;
                     } else {
-                        alert('Payment failed: ' + paymentResult.message);
+                        alert('Payment simulation failed: ' + paymentResult.message);
                     }
 
                 } catch (error) {

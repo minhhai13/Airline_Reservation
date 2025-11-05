@@ -140,4 +140,42 @@ public class PaymentRestController {
                     .body(ApiResponse.error(e.getMessage()));
         }
     }
+
+    // Thêm phương thức này vào PaymentRestController
+    @PostMapping("/simulate/success")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> simulatePayment(
+            @Valid @RequestBody PaymentRequest request) {
+
+        try {
+            // Lấy thông tin Booking
+            Booking booking = bookingService.findById(request.getBookingId())
+                    .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+            // 1. Tạo mã giao dịch giả lập
+            String txnRef = "SIM_" + System.currentTimeMillis();
+
+            // 2. Tạo Payment (PENDING)
+            Payment payment = paymentService.createPayment(
+                    booking.getId(),
+                    booking.getTotalPrice(),
+                    request.getPaymentMethod(),
+                    txnRef
+            );
+
+            // 3. Giả lập thành công -> Cập nhật Payment và Booking ngay lập tức
+            // Hàm processPayment đã bao gồm cả việc confirm booking
+            paymentService.processPayment(payment.getId(), txnRef);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("paymentId", payment.getId());
+            data.put("amount", payment.getAmount());
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(ApiResponse.success("Payment simulated successfully", data));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

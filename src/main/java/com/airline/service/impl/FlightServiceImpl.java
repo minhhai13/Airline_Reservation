@@ -72,7 +72,25 @@ public class FlightServiceImpl implements FlightService {
 
     @Override
     public Flight updateFlight(Flight flight) {
-        return flightDAO.save(flight);
+        // 1. Vẫn lưu/merge flight như bình thường
+        Flight mergedFlight = flightDAO.save(flight);
+
+        // 2. === SỬA LỖI Ở ĐÂY ===
+        // Thay vì trả về 'mergedFlight' (đang bị detached),
+        // chúng ta gọi lại 'flightDAO.findById' ngay lập tức.
+        // Phương thức findById của bạn đã được cấu hình JOIN FETCH
+        //
+        // nên nó sẽ tải lại đầy đủ entity VÀ CÁC QUAN HỆ
+        // (Route, Aircraft) trong khi transaction VẪN CÒN MỞ.
+        Optional<Flight> reFetchedFlight = flightDAO.findById(mergedFlight.getId());
+
+        if (reFetchedFlight.isEmpty()) {
+            // Trường hợp này gần như không thể xảy ra
+            throw new IllegalStateException("Không thể tải lại flight sau khi cập nhật.");
+        }
+
+        // 3. Trả về đối tượng đã được tải đầy đủ (fully initialized)
+        return reFetchedFlight.get();
     }
 
     @Override

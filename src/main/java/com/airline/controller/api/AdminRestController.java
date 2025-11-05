@@ -306,6 +306,7 @@ public class AdminRestController {
                 .availableSeats(flight.getAvailableSeats())
                 .route(routeInfo)
                 .aircraftModel(flight.getAircraft().getModelName())
+                .aircraftId(flight.getAircraft().getId())
                 .build();
     }
 }

@@ -102,5 +102,36 @@ public class PaymentController {
             model.addAttribute("message", "Giao dịch không hợp lệ: Sai chữ ký xác thực.");
             return "payment/failed";
         }
+    }// Thêm phương thức này vào PaymentController
+
+    @GetMapping("/result/simulate")
+    public String paymentResultSimulate(
+            @RequestParam(name = "bookingId") Long bookingId,
+            Model model) {
+
+        // Lấy thông tin booking
+        Optional<Booking> bookingOpt = bookingService.findById(bookingId);
+        if (bookingOpt.isEmpty()) {
+            return "redirect:/";
+        }
+
+        Booking booking = bookingOpt.get();
+        model.addAttribute("booking", booking);
+
+        // Vì đây là giả lập thành công, ta luôn trả về trang success
+        model.addAttribute("success", true);
+        model.addAttribute("message", "Thanh toán (giả lập) thành công!");
+        return "payment/success"; // Tái sử dụng trang success.html
+    }
+    // (Phương thức này có thể dùng chung cho mọi trường hợp muốn hiển thị trang failed)
+
+    @GetMapping("/show-failed")
+    public String showFailedPage(Model model) {
+        // model.containsAttribute("message") sẽ tự động kiểm tra
+        // "flash attribute" được thêm ở bước 2
+        if (!model.containsAttribute("message")) {
+            model.addAttribute("message", "Giao dịch của bạn đã thất bại.");
+        }
+        return "payment/failed"; // Trả về view payment/failed.html
     }
 }

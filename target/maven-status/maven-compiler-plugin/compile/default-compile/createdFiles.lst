@@ -8,7 +8,6 @@ com\airline\entity\BookingPassenger.class
 com\airline\entity\Booking$BookingStatus.class
 com\airline\dto\DashboardStats$DashboardStatsBuilder.class
 com\airline\entity\Booking.class
-com\airline\dto\FlightSearchRequest.class
 com\airline\service\FlightService.class
 com\airline\dto\UserResponse$UserResponseBuilder.class
 com\airline\controller\BookingController.class
@@ -17,7 +16,6 @@ com\airline\controller\api\BookingRestController.class
 com\airline\service\impl\UserServiceImpl.class
 com\airline\service\impl\FlightServiceImpl.class
 com\airline\dto\FlightRequest.class
-com\airline\dto\PageResponse.class
 com\airline\dto\BookingResponse$BookingResponseBuilder.class
 com\airline\service\RecommendationService.class
 com\airline\entity\Aircraft.class
@@ -31,7 +29,6 @@ com\airline\controller\api\PaymentRestController.class
 com\airline\controller\AuthController.class
 com\airline\controller\api\RecommendationRestController.class
 com\airline\service\impl\RouteServiceImpl.class
-com\airline\dto\PageResponse$PageResponseBuilder.class
 com\airline\dto\BookingRequest.class
 com\airline\service\impl\RecommendationServiceImpl.class
 com\airline\entity\Route$RouteBuilder.class
@@ -54,7 +51,6 @@ com\airline\entity\Route.class
 com\airline\entity\User.class
 com\airline\controller\HomeController.class
 com\airline\dao\impl\FlightDAOImpl.class
-com\airline\dao\BookingPassengerDAO.class
 com\airline\entity\User$UserRole.class
 com\airline\dto\DashboardStats.class
 com\airline\entity\Payment.class
@@ -63,7 +59,6 @@ com\airline\controller\PaymentController.class
 com\airline\dto\RouteInfo$RouteInfoBuilder.class
 com\airline\controller\FlightController.class
 com\airline\dao\impl\RouteDAOImpl.class
-com\airline\dao\impl\BookingPassengerDAOImpl.class
 com\airline\dto\RegisterRequest.class
 com\airline\dto\RouteInfo.class
 com\airline\dto\FlightResponse$FlightResponseBuilder.class

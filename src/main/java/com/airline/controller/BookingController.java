@@ -120,4 +120,17 @@ public class BookingController {
 
         return "booking/confirm"; // Hiển thị trang
     }
+
+    @GetMapping("/cancel-payment")
+    public String cancelPayment(HttpSession session, RedirectAttributes redirectAttributes) {
+        // 1. Xóa bookingRequest khỏi session
+        session.removeAttribute("bookingRequest");
+
+        // 2. Thêm một thông báo để trang failed.html có thể hiển thị
+        redirectAttributes.addFlashAttribute("message", "Bạn đã hủy thanh toán.");
+
+        // 3. Chuyển hướng đến một URL hiển thị trang failed
+        // (Chúng ta cần thêm URL này ở bước 3)
+        return "redirect:/payment/show-failed";
+    }
 }
