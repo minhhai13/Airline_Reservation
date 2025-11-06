@@ -22,6 +22,13 @@ public class FlightRestController {
 
     /**
      * API search flights with pagination Dùng cho AJAX calls từ search.html
+     *
+     * @param origin
+     * @param destination
+     * @param date
+     * @param page
+     * @param size
+     * @return
      */
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Map<String, Object>>> searchFlights(

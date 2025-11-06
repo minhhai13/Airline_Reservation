@@ -29,4 +29,7 @@ public interface FlightDAO {
     List<Flight> findByRouteAndDate(Long routeId, LocalDateTime date, int page, int size);
 
     long countByRouteAndDate(Long routeId, LocalDateTime date);
+
+    List<Object[]> findTopFlightsByBookingCount(int limit);
+
 }

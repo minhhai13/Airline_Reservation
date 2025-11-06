@@ -28,15 +28,15 @@ public class UserServiceImpl implements UserService {
         if (existsByEmail(user.getEmail())) {
             throw new IllegalArgumentException("Email already exists");
         }
-        
+
         // Hash password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        
+
         // Set default role if not set
         if (user.getRole() == null) {
             user.setRole(User.UserRole.USER);
         }
-        
+
         return userDAO.save(user);
     }
 
@@ -104,5 +104,18 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userDAO.existsByEmail(email);
     }
-}
 
+    // THÊM PHƯƠNG THỨC NÀY
+    @Override
+    public User updateUserRole(Long userId, User.UserRole newRole) {
+        User user = userDAO.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.getRole() == newRole) {
+            return user; // No change needed
+        }
+
+        user.setRole(newRole);
+        return userDAO.save(user);
+    }
+}

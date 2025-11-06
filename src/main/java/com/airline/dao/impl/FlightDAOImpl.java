@@ -160,4 +160,15 @@ public class FlightDAOImpl implements FlightDAO {
                 .setParameter("end", endOfDay)
                 .getSingleResult();
     }
+
+    // THÊM PHƯƠNG THỨC MỚI
+    @Override
+    public List<Object[]> findTopFlightsByBookingCount(int limit) {
+        return em.createQuery(
+                "SELECT b.flight, COUNT(b.id) FROM Booking b "
+                + "GROUP BY b.flight "
+                + "ORDER BY COUNT(b.id) DESC", Object[].class)
+                .setMaxResults(limit)
+                .getResultList();
+    }
 }

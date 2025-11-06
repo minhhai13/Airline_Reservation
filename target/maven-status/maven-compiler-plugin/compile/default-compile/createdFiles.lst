@@ -29,6 +29,7 @@ com\airline\controller\AuthController.class
 com\airline\controller\api\RecommendationRestController.class
 com\airline\service\impl\RouteServiceImpl.class
 com\airline\dto\BookingRequest.class
+com\airline\service\impl\AdminServiceImpl.class
 com\airline\service\impl\RecommendationServiceImpl.class
 com\airline\entity\Route$RouteBuilder.class
 com\airline\controller\UserController.class
@@ -39,6 +40,7 @@ com\airline\service\impl\BookingServiceImpl.class
 com\airline\entity\Flight$FlightBuilder.class
 com\airline\dao\impl\AircraftDAOImpl.class
 com\airline\dto\UserResponse.class
+com\airline\service\AdminService.class
 com\airline\dao\AircraftDAO.class
 com\airline\service\BookingService.class
 com\airline\dao\BookingDAO.class

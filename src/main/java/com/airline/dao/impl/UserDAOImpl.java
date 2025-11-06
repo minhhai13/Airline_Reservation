@@ -102,4 +102,14 @@ public class UserDAOImpl implements UserDAO {
                 .getSingleResult();
         return count > 0;
     }
+
+    @Override
+    public List<Object[]> findTopUsersByBookingCount(int limit) {
+        return em.createQuery(
+                "SELECT b.user, COUNT(b.id) FROM Booking b "
+                + "GROUP BY b.user "
+                + "ORDER BY COUNT(b.id) DESC", Object[].class)
+                .setMaxResults(limit)
+                .getResultList();
+    }
 }

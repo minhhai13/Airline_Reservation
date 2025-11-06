@@ -26,4 +26,8 @@ public interface UserDAO {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
+    // THÊM DÒNG NÀY
+    List<Object[]> findTopUsersByBookingCount(int limit);
+
 }

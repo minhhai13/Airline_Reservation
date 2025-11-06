@@ -24,7 +24,7 @@ public class AuthController {
     // Login Page
     @GetMapping("/login")
     public String loginPage(@RequestParam(name = "redirect", required = false) String redirect,
-                           Model model) {
+            Model model) {
         model.addAttribute("loginRequest", new LoginRequest());
         model.addAttribute("redirect", redirect != null ? redirect : "/");
         return "auth/login";
@@ -33,17 +33,17 @@ public class AuthController {
     // Login Submit
     @PostMapping("/login")
     public String login(@Valid @ModelAttribute LoginRequest request,
-                       BindingResult result,
-                       @RequestParam(name = "redirect", required = false) String redirect,
-                       HttpSession session,
-                       RedirectAttributes redirectAttributes) {
-        
+            BindingResult result,
+            @RequestParam(name = "redirect", required = false) String redirect,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
         if (result.hasErrors()) {
-            return "auth/login";
+            return "auth/login" + (redirect != null ? "?redirect=" + redirect : "");
         }
 
         Optional<User> userOpt = userService.login(request.getUsername(), request.getPassword());
-        
+
         if (userOpt.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "Invalid username or password");
             return "redirect:/login" + (redirect != null ? "?redirect=" + redirect : "");
@@ -64,37 +64,39 @@ public class AuthController {
 
     // Register Page
     @GetMapping("/register")
-    public String registerPage(Model model) {
+    public String registerPage(@RequestParam(name = "redirect", required = false) String redirect, Model model) {
         model.addAttribute("registerRequest", new RegisterRequest());
+        model.addAttribute("redirect", redirect != null ? redirect : "/");
         return "auth/register";
     }
 
     // Register Submit
     @PostMapping("/register")
     public String register(@Valid @ModelAttribute RegisterRequest request,
-                          BindingResult result,
-                          RedirectAttributes redirectAttributes) {
-        
+            BindingResult result,
+            @RequestParam(name = "redirect", required = false) String redirect,
+            RedirectAttributes redirectAttributes) {
+
         if (result.hasErrors()) {
-            return "auth/register";
+            return "auth/register" + (redirect != null ? "?redirect=" + redirect : "");
         }
 
         try {
             User user = User.builder()
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .email(request.getEmail())
-                .fullName(request.getFullName())
-                .role(User.UserRole.USER)
-                .build();
+                    .username(request.getUsername())
+                    .password(request.getPassword())
+                    .email(request.getEmail())
+                    .fullName(request.getFullName())
+                    .role(User.UserRole.USER)
+                    .build();
 
             userService.register(user);
             redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
-            return "redirect:/login";
-            
+            return "redirect:/login" + (redirect != null ? "?redirect=" + redirect : "");
+
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/register";
+            return "redirect:/register" + (redirect != null ? "?redirect=" + redirect : "");
         }
     }
 
@@ -105,4 +107,3 @@ public class AuthController {
         return "redirect:/";
     }
 }
-

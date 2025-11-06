@@ -26,6 +26,10 @@
 
                 <div class="col-md-10">
                     <h2 class="mb-4"><i class="bi bi-people"></i> Manage Users</h2>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i> Tài khoản có ID 1 là Master Admin và không thể bị xóa hoặc thay đổi vai trò.
+                    </div>
 
                     <div class="card">
                         <div class="card-body">
@@ -39,7 +43,8 @@
                                             <th>Email</th>
                                             <th>Role</th>
                                             <th>Created At</th>
-                                            <th>Actions</th> </tr>
+                                            <th>Actions</th> 
+                                        </tr>
                                     </thead>
                                     <tbody>
                                         <tr th:each="user : ${users}">
@@ -49,25 +54,27 @@
                                             </td>
                                             <td th:text="${user.fullName}">John Doe</td>
                                             <td th:text="${user.email}">john@email.com</td>
+                                            
                                             <td>
-                                                <span class="badge" 
-                                                      th:classappend="${user.role.toString() == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
-                                                      th:text="${user.role}">
-                                                    USER
-                                                </span>
-                                            </td>
+                                                <select class="form-select form-select-sm" 
+                                                        th:id="'roleSelect-' + ${user.id}"
+                                                        th:onchange="'updateUserRole(' + ${user.id} + ')'"
+                                                        th:disabled="${session.user.id == user.id or user.id == 1}"> <option value="USER" th:selected="${user.role.toString() == 'USER'}">USER</option>
+                                                    <option value="ADMIN" th:selected="${user.role.toString() == 'ADMIN'}">ADMIN</option>
+                                                </select>
+                                                </td>
+
                                             <td th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy')}">
                                                 01/11/2025
                                             </td>
                                             <td>
                                                 <div class="btn-group btn-group-sm">
                                                     <a class="btn btn-outline-info" 
-                                                            th:href="@{/admin/{id}(id=${user.id})}">
+                                                            th:href="@{/admin/users/{id}(id=${user.id})}">
                                                         <i class="bi bi-eye"></i> View
                                                     </a>
                                                     <button class="btn btn-outline-danger"
-                                                            th:if="${session.user.id != user.id}" 
-                                                            th:onclick="deleteUser([[${user.id}]], [[${user.username}]])">
+                                                            th:if="${session.user.id != user.id and user.id != 1}" th:onclick="deleteUser([[${user.id}]], [[${user.username}]])">
                                                         <i class="bi bi-trash"></i> Delete
                                                     </button>
                                                 </div>
@@ -86,16 +93,22 @@
         <div th:replace="~{fragments/layout :: scripts}"></div>
 
         <script th:inline="javascript">
-            // 1. Thêm biến contextPath
+            // Biến contextPath để định tuyến API
             const contextPath = /*[[@{/}]]*/ '/';
 
+            // ==================== DELETE USER ====================
             async function deleteUser(userId, username) {
+                // Kiểm tra lần nữa ở client nếu ID là 1 (Master Admin)
+                if (userId === 1) {
+                    alert('Cannot delete the Master Admin account.');
+                    return;
+                }
+
                 if (!confirm('Are you sure you want to delete user "' + username + '"? This action cannot be undone.')) {
                     return;
                 }
 
                 try {
-                    // 2. Gọi API DELETE
                     const response = await fetch(contextPath + `api/admin/users/${userId}`, {
                         method: 'DELETE'
                     });
@@ -113,6 +126,52 @@
                     alert('An error occurred. Please try again.');
                 }
             }
+            
+            // ==================== UPDATE USER ROLE ====================
+            async function updateUserRole(userId) {
+                const roleSelect = document.getElementById(`roleSelect-${userId}`);
+                const newRole = roleSelect.value;
+                const originalRole = roleSelect.getAttribute('data-original-role'); 
+                
+                // Kiểm tra lần nữa ở client nếu ID là 1 (Master Admin)
+                if (userId === 1) {
+                    alert('Cannot change the role of the Master Admin account.');
+                    roleSelect.value = originalRole;
+                    return;
+                }
+
+                if (!confirm(`Are you sure you want to change user role to ${newRole}?`)) {
+                    roleSelect.value = originalRole;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(contextPath + `api/admin/users/${userId}/role?role=${newRole}`, {
+                        method: 'PUT'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert('User role updated successfully to ' + newRole + '!');
+                        roleSelect.setAttribute('data-original-role', newRole);
+                    } else {
+                        alert('Failed to update role: ' + result.message);
+                        roleSelect.value = originalRole;
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                    roleSelect.value = originalRole;
+                }
+            }
+            
+            // Khởi tạo thuộc tính data-original-role khi tải trang
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('select[id^="roleSelect-"]').forEach(select => {
+                    select.setAttribute('data-original-role', select.value);
+                });
+            });
         </script>
 
     </body>

@@ -23,9 +23,6 @@ public class BookingController {
     @Autowired
     private FlightService flightService;
 
-    @Autowired
-    private BookingService bookingService;
-
     // Bước 1: Hiển thị form
     @GetMapping("/{flightId}")
     public String bookingForm(@PathVariable(name = "flightId") Long flightId,

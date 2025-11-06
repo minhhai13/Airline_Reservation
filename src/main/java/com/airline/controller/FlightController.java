@@ -24,6 +24,13 @@ public class FlightController {
     /**
      * Search flights - First load (từ index.html) Trả về 10 flights đầu tiên
      * (page 0)
+     *
+     * @param origin
+     * @param destination
+     * @param date
+     * @param passengers
+     * @param model
+     * @return
      */
     @GetMapping("/search")
     public String searchFlights(

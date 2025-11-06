@@ -1,5 +1,6 @@
 package com.airline.controller;
 
+import com.airline.dao.AircraftDAO;
 import com.airline.dto.DashboardStats;
 import com.airline.entity.Aircraft;
 import com.airline.entity.Booking;
@@ -7,14 +8,14 @@ import com.airline.entity.Flight;
 import com.airline.entity.Route;
 import com.airline.entity.User;
 import com.airline.service.*;
-import com.airline.dao.AircraftDAO;
 import jakarta.servlet.http.HttpSession;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.math.BigDecimal;
-import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,10 +31,13 @@ public class AdminController {
     private BookingService bookingService;
 
     @Autowired
-    private RouteService routeService; // <-- Đã thêm
+    private RouteService routeService;
 
     @Autowired
-    private AircraftDAO aircraftDAO; // <-- Đã thêm
+    private AircraftDAO aircraftDAO;
+
+    @Autowired
+    private AdminService adminService;
 
     // Check admin role
     private boolean isAdmin(HttpSession session) {
@@ -41,10 +45,12 @@ public class AdminController {
         return user != null && user.isAdmin();
     }
 
-    @GetMapping("/{userId}")
-    public String bookingForm(@PathVariable(name = "userId") Long userId,
+    // PHƯƠNG THỨC ĐÃ SỬA: Dùng /users/{userId} để tránh xung đột với các route khác dưới /admin/
+    @GetMapping("/users/{userId}")
+    public String viewUser(@PathVariable(name = "userId") Long userId,
             Model model) {
-        User user = userService.findById(userId).get();
+        User user = userService.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         model.addAttribute("user", user);
         return "admin/profile";
     }
@@ -56,30 +62,22 @@ public class AdminController {
             return "redirect:/login";
         }
 
-        List<User> allUsers = userService.findAllUsers();
-        List<Flight> allFlights = flightService.findAll();
-        List<Booking> allBookings = bookingService.findAll();
-
-        long pendingCount = allBookings.stream().filter(Booking::isPending).count();
-        long confirmedCount = allBookings.stream().filter(Booking::isConfirmed).count();
-        long cancelledCount = allBookings.stream().filter(Booking::isCancelled).count();
-
-        BigDecimal totalRevenue = allBookings.stream()
-                .filter(Booking::isConfirmed)
-                .map(Booking::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Map<String, Object> allStats = adminService.getDashboardStatistics();
 
         DashboardStats stats = DashboardStats.builder()
-                .totalUsers((long) allUsers.size())
-                .totalFlights((long) allFlights.size())
-                .totalBookings((long) allBookings.size())
-                .pendingBookings(pendingCount)
-                .confirmedBookings(confirmedCount)
-                .cancelledBookings(cancelledCount)
-                .totalRevenue(totalRevenue)
+                .totalUsers((Long) allStats.get("totalUsers"))
+                .totalFlights((Long) allStats.get("totalFlights"))
+                .totalBookings((Long) allStats.get("totalBookings"))
+                .pendingBookings((Long) allStats.get("pendingBookings"))
+                .confirmedBookings((Long) allStats.get("confirmedBookings"))
+                .cancelledBookings((Long) allStats.get("cancelledBookings"))
+                .totalRevenue((BigDecimal) allStats.get("totalRevenue"))
                 .build();
 
         model.addAttribute("stats", stats);
+        model.addAttribute("topUsers", allStats.get("topUsers"));
+        model.addAttribute("topFlights", allStats.get("topFlights"));
+
         return "admin/dashboard";
     }
 
@@ -91,12 +89,12 @@ public class AdminController {
         }
 
         List<Flight> flights = flightService.findAll();
-        List<Route> routes = routeService.findAll(); // <-- Đã thêm
-        List<Aircraft> aircrafts = aircraftDAO.findAll(); // <-- Đã thêm
+        List<Route> routes = routeService.findAll();
+        List<Aircraft> aircrafts = aircraftDAO.findAll();
 
         model.addAttribute("flights", flights);
-        model.addAttribute("routes", routes); // <-- Đã thêm
-        model.addAttribute("aircrafts", aircrafts); // <-- Đã thêm
+        model.addAttribute("routes", routes);
+        model.addAttribute("aircrafts", aircrafts);
 
         return "admin/flights";
     }
@@ -124,4 +122,5 @@ public class AdminController {
         model.addAttribute("bookings", bookings);
         return "admin/bookings";
     }
+
 }

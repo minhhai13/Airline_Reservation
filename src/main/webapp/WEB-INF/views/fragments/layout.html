@@ -120,19 +120,6 @@
                             </a>
                         </li>
 
-                        <!-- Admin menu -->
-                        <li class="nav-item dropdown" th:if="${session.user != null && session.user.role.name() == 'ADMIN'}">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-shield-lock"></i> Admin
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" th:href="@{/admin/dashboard}">Dashboard</a></li>
-                                <li><a class="dropdown-item" th:href="@{/admin/flights}">Flights</a></li>
-                                <li><a class="dropdown-item" th:href="@{/admin/users}">Users</a></li>
-                                <li><a class="dropdown-item" th:href="@{/admin/bookings}">Bookings</a></li>
-                            </ul>
-                        </li>
-
                         <!-- User menu -->
                         <li class="nav-item dropdown" th:if="${session.user != null}">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
@@ -171,10 +158,6 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
-
-
-
-
 
                         <!-- Admin menu -->
                         <li class="nav-item dropdown" th:if="${session.user != null && session.user.role.name() == 'ADMIN'}">

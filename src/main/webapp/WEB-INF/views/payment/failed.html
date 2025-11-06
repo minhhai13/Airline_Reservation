@@ -3,38 +3,41 @@
 <!-- ============================================================================ -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Payment Failed - SkyReserve')}"></head>
-<body class="bg-light">
+    <head th:replace="~{fragments/layout :: head('Payment Failed - SkyReserve')}"></head>
+    <body class="bg-light">
 
-<nav th:replace="~{fragments/layout :: navbar}"></nav>
+        <nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<main class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card text-center shadow">
-                <div class="card-body p-5">
-                    <div class="mb-4">
-                        <i class="bi bi-x-circle-fill display-1 text-danger"></i>
-                    </div>
-                    
-                    <h2 class="text-danger mb-3">Payment Failed</h2>
+        <main class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card text-center shadow">
+                        <div class="card-body p-5">
+                            <div class="mb-4">
+                                <i class="bi bi-x-circle-fill display-1 text-danger"></i>
+                            </div>
 
-                    <div class="d-grid gap-2">
-                        <a th:href="@{/flights/search}" class="btn btn-outline-secondary">
-                            <i class="bi bi-search"></i> Search Other Flights
-                        </a>
-                        <a th:href="@{/}" class="btn btn-outline-secondary">
-                            <i class="bi bi-house"></i> Back to Home
-                        </a>
+                            <h2 class="text-danger mb-3">Payment Failed</h2>
+                            <p class="lead" th:if="${message}" th:text="${message}">
+                                Bạn đã hủy thanh toán.
+                            </p>
+                            <hr th:if="${message}">
+                            <div class="d-grid gap-2">
+                                <a th:href="@{/flights/search}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-search"></i> Search Other Flights
+                                </a>
+                                <a th:href="@{/}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-house"></i> Back to Home
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</main>
+        </main>
 
-<footer th:replace="~{fragments/layout :: footer}"></footer>
-<div th:replace="~{fragments/layout :: scripts}"></div>
+        <footer th:replace="~{fragments/layout :: footer}"></footer>
+        <div th:replace="~{fragments/layout :: scripts}"></div>
 
-</body>
+    </body>
 </html>
