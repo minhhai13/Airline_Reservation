@@ -8,7 +8,7 @@ public class VNPayConfig {
 
     // === SỬA LỖI: THÊM /airline TRỞ LẠI ===
     // URL này phải khớp với URL "Forwarding" mà ngrok trả về
-    public static String vnp_ReturnUrl = "https://pseudorheumatic-leslie-noncaustic.ngrok-free.dev/airline/payment/result";
+    public static String vnp_ReturnUrl = "https://broodless-michiko-evolutionarily.ngrok-free.dev/airline/payment/result";
 
     public static String getRandomNumber(int len) {
         String chars = "0123456789";

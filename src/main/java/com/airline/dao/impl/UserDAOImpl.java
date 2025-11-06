@@ -8,9 +8,9 @@ import com.airline.entity.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
 /**
  * UserDAOImpl Implementation of UserDAO using JPA EntityManager
@@ -92,6 +92,16 @@ public class UserDAOImpl implements UserDAO {
                 .setParameter("username", username)
                 .getSingleResult();
         return count > 0;
+    }
+    // THÊM PHƯƠNG THỨC MỚI
+    @Override
+    public List<Object[]> findTopUsersByBookingCount(int limit) {
+        return em.createQuery(
+                "SELECT b.user, COUNT(b.id) FROM Booking b "
+                + "GROUP BY b.user "
+                + "ORDER BY COUNT(b.id) DESC", Object[].class)
+                .setMaxResults(limit)
+                .getResultList();
     }
 
     @Override

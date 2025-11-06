@@ -1,6 +1,7 @@
-<!-- ============================================================================ -->
-<!-- admin/dashboard.html - Admin Dashboard -->
-<!-- ============================================================================ -->
+<!--option 1:-->
+<!-- ============================================================================ 
+ admin/dashboard.html - Admin Dashboard 
+ ============================================================================ 
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments/layout :: head('Admin Dashboard - SkyReserve')}"></head>
@@ -10,7 +11,6 @@
 
 <main class="container-fluid mt-4">
     <div class="row">
-        <!-- Sidebar -->
         <div class="col-md-2">
             <div class="list-group">
                 <a th:href="@{/admin/dashboard}" class="list-group-item list-group-item-action active">
@@ -28,13 +28,11 @@
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="col-md-10">
             <h2 class="mb-4">
                 <i class="bi bi-speedometer2"></i> Dashboard Overview
             </h2>
 
-            <!-- Stats Cards -->
             <div class="row">
                 <div class="col-md-3 mb-4">
                     <div class="card bg-primary text-white">
@@ -96,7 +94,6 @@
                 </div>
             </div>
 
-            <!-- Booking Status Breakdown -->
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="card">
@@ -130,6 +127,93 @@
             </div>
         </div>
     </div>
+    <div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-people-fill"></i> Top 10 Users by Bookings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Bookings</th>
+                                    <th>Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="stat, iterStat : ${topUsers}">
+                                    <td th:text="${iterStat.index + 1}">1</td>
+                                    <td>
+                                        <a th:href="@{/admin/users/{id}(id=${stat.user.id})}" 
+                                           th:text="${stat.user.username}">user_1</a>
+                                    </td>
+                                    <td th:text="${stat.bookingCount}">10</td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${stat.user.role.toString() == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
+                                              th:text="${stat.user.role}">USER</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p th:if="${#lists.isEmpty(topUsers)}" class="text-center text-muted m-0">No booking data found for users.</p>
+                </div>
+            </div>
+        </div>
+new
+        <div class="col-md-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-airplane-fill"></i> Top 10 Flights by Bookings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Flight No.</th>
+                                    <th>Route</th>
+                                    <th>Bookings</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="stat, iterStat : ${topFlights}">
+                                    <td th:text="${iterStat.index + 1}">1</td>
+                                    <td>
+                                        <a th:href="@{/flights/{id}(id=${stat.flight.id})}"
+                                           th:text="${stat.flight.flightNumber}">VN101</a>
+                                    </td>
+                                    <td>
+                                        <span th:text="${stat.flight.route.origin}">Hanoi</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                        <span th:text="${stat.flight.route.destination}">HCMC</span>
+                                    </td>
+                                    <td th:text="${stat.bookingCount}">50</td>
+                                    <td th:text="${#numbers.formatDecimal(stat.flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                        1,500,000 VND
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p th:if="${#lists.isEmpty(topFlights)}" class="text-center text-muted m-0">No booking data found for flights.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>
@@ -137,4 +221,472 @@
 
 </body>
 </html>
+-->
 
+<!--option 2:-->
+<!--<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard - SkyReserve')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: admin-navbar}"></nav>
+
+<main class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group">
+                <a th:href="@{/admin/dashboard}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a th:href="@{/admin/flights}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-airplane"></i> Flights
+                </a>
+                <a th:href="@{/admin/users}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people"></i> Users
+                </a>
+                <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-ticket"></i> Bookings
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <h2 class="mb-4">
+                <i class="bi bi-speedometer2"></i> Dashboard Overview
+            </h2>
+
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Users</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalUsers}">0</h2>
+                                </div>
+                                <i class="bi bi-people-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Flights</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalFlights}">0</h2>
+                                </div>
+                                <i class="bi bi-airplane-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Bookings</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalBookings}">0</h2>
+                                </div>
+                                <i class="bi bi-ticket-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Revenue</h6>
+                                    <h5 class="mb-0" 
+                                        th:text="${#numbers.formatDecimal(stats.totalRevenue / 1000000, 1, 'COMMA', 2, 'POINT')} + 'M'">
+                                        0M
+                                    </h5>
+                                </div>
+                                <i class="bi bi-currency-dollar display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clock-fill display-4 text-warning"></i>
+                            <h3 class="mt-3" th:text="${stats.pendingBookings}">0</h3>
+                            <p class="text-muted">Pending Bookings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-check-circle-fill display-4 text-success"></i>
+                            <h3 class="mt-3" th:text="${stats.confirmedBookings}">0</h3>
+                            <p class="text-muted">Confirmed Bookings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-x-circle-fill display-4 text-danger"></i>
+                            <h3 class="mt-3" th:text="${stats.cancelledBookings}">0</h3>
+                            <p class="text-muted">Cancelled Bookings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mb-4 mt-3">
+                <button class="btn btn-outline-primary btn-lg" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#topUsersCollapse" 
+                        aria-expanded="false" aria-controls="topUsersCollapse">
+                    <i class="bi bi-person-badge"></i> Show Top 10 Users
+                </button>
+                <button class="btn btn-outline-success btn-lg" type="button" 
+                        data-bs-toggle="collapse" data-bs-target="#topFlightsCollapse" 
+                        aria-expanded="false" aria-controls="topFlightsCollapse">
+                    <i class="bi bi-bar-chart-line"></i> Show Top 10 Flights
+                </button>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6 mb-4 collapse" id="topUsersCollapse">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people-fill"></i> Top 10 Users by Bookings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Username</th>
+                                            <th>Bookings</th>
+                                            <th>Role</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="stat, iterStat : ${topUsers}">
+                                            <td th:text="${iterStat.index + 1}">1</td>
+                                            <td>
+                                                <a th:href="@{/admin/users/{id}(id=${stat.user.id})}" 
+                                                   th:text="${stat.user.username}">user_1</a>
+                                            </td>
+                                            <td th:text="${stat.bookingCount}">10</td>
+                                            <td>
+                                                <span class="badge" 
+                                                      th:classappend="${stat.user.role.toString() == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
+                                                      th:text="${stat.user.role}">USER</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p th:if="${#lists.isEmpty(topUsers)}" class="text-center text-muted m-0">No booking data found for users.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4 collapse" id="topFlightsCollapse">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-airplane-fill"></i> Top 10 Flights by Bookings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Flight No.</th>
+                                            <th>Route</th>
+                                            <th>Bookings</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="stat, iterStat : ${topFlights}">
+                                            <td th:text="${iterStat.index + 1}">1</td>
+                                            <td>
+                                                <a th:href="@{/flights/{id}(id=${stat.flight.id})}"
+                                                   th:text="${stat.flight.flightNumber}">VN101</a>
+                                            </td>
+                                            <td>
+                                                <span th:text="${stat.flight.route.origin}">Hanoi</span>
+                                                <i class="bi bi-arrow-right"></i>
+                                                <span th:text="${stat.flight.route.destination}">HCMC</span>
+                                            </td>
+                                            <td th:text="${stat.bookingCount}">50</td>
+                                            <td th:text="${#numbers.formatDecimal(stat.flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                                1,500,000 VND
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p th:if="${#lists.isEmpty(topFlights)}" class="text-center text-muted m-0">No booking data found for flights.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+</body>
+</html>-->
+
+
+<!--option 3:-->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin Dashboard - SkyReserve')}"></head>
+<body>
+
+<nav th:replace="~{fragments/layout :: admin-navbar}"></nav>
+
+<main class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="list-group">
+                <a th:href="@{/admin/dashboard}" class="list-group-item list-group-item-action active">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a th:href="@{/admin/flights}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-airplane"></i> Flights
+                </a>
+                <a th:href="@{/admin/users}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people"></i> Users
+                </a>
+                <a th:href="@{/admin/bookings}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-ticket"></i> Bookings
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <h2 class="mb-4">
+                <i class="bi bi-speedometer2"></i> Dashboard Overview
+            </h2>
+
+            <div class="row">
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Users</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalUsers}">0</h2>
+                                </div>
+                                <i class="bi bi-people-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Flights</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalFlights}">0</h2>
+                                </div>
+                                <i class="bi bi-airplane-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Bookings</h6>
+                                    <h2 class="mb-0" th:text="${stats.totalBookings}">0</h2>
+                                </div>
+                                <i class="bi bi-ticket-fill display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title">Total Revenue</h6>
+                                    <h5 class="mb-0" 
+                                        th:text="${#numbers.formatDecimal(stats.totalRevenue / 1000000, 1, 'COMMA', 2, 'POINT')} + 'M'">
+                                        0M
+                                    </h5>
+                                </div>
+                                <i class="bi bi-currency-dollar display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-clock-fill display-4 text-warning"></i>
+                            <h3 class="mt-3" th:text="${stats.pendingBookings}">0</h3>
+                            <p class="text-muted">Pending Bookings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-check-circle-fill display-4 text-success"></i>
+                            <h3 class="mt-3" th:text="${stats.confirmedBookings}">0</h3>
+                            <p class="text-muted">Confirmed Bookings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="bi bi-x-circle-fill display-4 text-danger"></i>
+                            <h3 class="mt-3" th:text="${stats.cancelledBookings}">0</h3>
+                            <p class="text-muted">Cancelled Bookings</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <ul class="nav nav-pills justify-content-center gap-3 mb-4 mt-3" id="topListsTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active btn-lg btn-outline-primary" id="users-tab" data-bs-toggle="tab" data-bs-target="#topUsersPane" type="button" role="tab" aria-controls="topUsersPane" aria-selected="true">
+                        <i class="bi bi-person-badge"></i> Top 10 Users
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link btn-lg btn-outline-success" id="flights-tab" data-bs-toggle="tab" data-bs-target="#topFlightsPane" type="button" role="tab" aria-controls="topFlightsPane" aria-selected="false">
+                        <i class="bi bi-bar-chart-line"></i> Top 10 Flights
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="topListsTabContent">
+                
+                <div class="tab-pane fade show active" id="topUsersPane" role="tabpanel" aria-labelledby="users-tab">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white py-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-people-fill"></i> Top 10 Users by Bookings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Username</th>
+                                            <th>Bookings</th>
+                                            <th>Role</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="stat, iterStat : ${topUsers}">
+                                            <td th:text="${iterStat.index + 1}">1</td>
+                                            <td>
+                                                <a 
+                                                   th:text="${stat.user.username}">user_1</a>
+                                            </td>
+                                            <td th:text="${stat.bookingCount}">10</td>
+                                            <td>
+                                                <span class="badge" 
+                                                      th:classappend="${stat.user.role.toString() == 'ADMIN' ? 'bg-danger' : 'bg-primary'}"
+                                                      th:text="${stat.user.role}">USER</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p th:if="${#lists.isEmpty(topUsers)}" class="text-center text-muted m-0">No booking data found for users.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="topFlightsPane" role="tabpanel" aria-labelledby="flights-tab">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-success text-white py-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-airplane-fill"></i> Top 10 Flights by Bookings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Flight No.</th>
+                                            <th>Route</th>
+                                            <th>Bookings</th>
+                                            <th>Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="stat, iterStat : ${topFlights}">
+                                            <td th:text="${iterStat.index + 1}">1</td>
+                                            <td>
+                                                <a
+                                                   th:text="${stat.flight.flightNumber}">VN101</a>
+                                            </td>
+                                            <td>
+                                                <span th:text="${stat.flight.route.origin}">Hanoi</span>
+                                                <i class="bi bi-arrow-right"></i>
+                                                <span th:text="${stat.flight.route.destination}">HCMC</span>
+                                            </td>
+                                            <td th:text="${stat.bookingCount}">50</td>
+                                            <td th:text="${#numbers.formatDecimal(stat.flight.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                                1,500,000 VND
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p th:if="${#lists.isEmpty(topFlights)}" class="text-center text-muted m-0">No booking data found for flights.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+
+</body>
+</html>

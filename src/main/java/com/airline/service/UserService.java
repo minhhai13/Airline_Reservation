@@ -16,5 +16,7 @@ public interface UserService {
     void deleteUser(Long id);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    // THÊM PHƯƠNG THỨC NÀY
+    User updateUserRole(Long userId, User.UserRole newRole);
 }
 

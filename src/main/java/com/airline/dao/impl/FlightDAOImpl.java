@@ -8,10 +8,10 @@ import com.airline.entity.Flight;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
 
 /**
  * FlightDAOImpl
@@ -159,5 +159,17 @@ public class FlightDAOImpl implements FlightDAO {
                 .setParameter("start", startOfDay)
                 .setParameter("end", endOfDay)
                 .getSingleResult();
+    }
+    
+    
+    // THÊM PHƯƠNG THỨC MỚI
+    @Override
+    public List<Object[]> findTopFlightsByBookingCount(int limit) {
+        return em.createQuery(
+                "SELECT b.flight, COUNT(b.id) FROM Booking b "
+                + "GROUP BY b.flight "
+                + "ORDER BY COUNT(b.id) DESC", Object[].class)
+                .setMaxResults(limit)
+                .getResultList();
     }
 }
