@@ -5,10 +5,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
     <head th:replace="~{fragments/layout :: head('Profile - SkyReserve')}"></head>
     <body>
-
-        <nav th:replace="~{${session.user != null && session.user.role.name() == 'ADMIN' ? 
-                   'fragments/layout :: admin-navbar' : 
-                   'fragments/layout :: navbar'}}"></nav>
+               <nav th:replace="~{fragments/layout :: ${user?.admin ? 'admin-navbar' : 'navbar'}}"></nav>
 
         <main class="container mt-4">
             <div class="row justify-content-center">
